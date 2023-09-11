@@ -43,7 +43,7 @@ namespace PdfiumViewer
             ZoomMode = PdfViewerZoomMode.FitHeight;
             Rotate = PdfRotation.Rotate0;
             Flags = PdfRenderFlags.None;
-            PagesDisplayMode = PdfViewerPagesDisplayMode.SinglePageMode;
+            PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
             MouseWheelMode = MouseWheelMode.PanAndZoom;
             Dpi = 96;
             ScrollWidth = 50;
@@ -68,7 +68,7 @@ namespace PdfiumViewer
         protected Image Frame1 => Frames?.FirstOrDefault();
         protected Image Frame2 => Frames?.Length > 1 ? Frames[1] : null;
         protected Image[] Frames { get; set; }
-        protected Size CurrentPageSize { get; set; }
+        public Size CurrentPageSize { get; set; }
         protected int ScrollWidth { get; set; }
         protected int MouseWheelDelta { get; set; }
         protected long MouseWheelUpdateTime { get; set; }
@@ -149,7 +149,7 @@ namespace PdfiumViewer
 
                 for (var i = 0; i < Frames.Length; i++)
                 {
-                    Frames[i] ??= new Image { Margin = FrameSpace };
+                    Frames[i] = Frames[i] ?? new Image { Margin = FrameSpace };
 
                     var pageSize = CalculatePageSize(i);
                     Frames[i].Width = pageSize.Width;
@@ -175,7 +175,11 @@ namespace PdfiumViewer
         protected BitmapImage RenderPage(Image frame, int page, int width, int height)
         {
             if (frame == null) return null;
-            var image = Document.Render(page, width, height, Dpi, Dpi, Rotate, Flags);
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var image = Document.Render(page, (int)(width * 1.2f), (int)(height * 1.2f), Dpi, Dpi, Rotate, Flags);
             BitmapImage bitmapImage;
             using (var memory = new MemoryStream())
             {
@@ -193,7 +197,10 @@ namespace PdfiumViewer
             // It enables caching if caching is possible, and it causes the load to happen at EndInit().
             // In our case caching is impossible, so all it does it cause the load to happen immediately.
 
-            CurrentProcess?.Refresh();
+            stopwatch.Stop();
+            Debug.WriteLine("RenderPage : " + stopwatch.ElapsedMilliseconds + " mS, size=" + width + " x " + height);
+
+            //CurrentProcess?.Refresh();
             Dispatcher.Invoke(() =>
             {
                 frame.Width = width;
@@ -205,7 +212,7 @@ namespace PdfiumViewer
         }
         protected Size CalculatePageSize(int? page = null)
         {
-            page ??= PageNo;
+            page = page ?? PageNo;
             var isReverse = (Rotate == PdfRotation.Rotate90 || Rotate == PdfRotation.Rotate270);
             var containerWidth = ActualWidth - Padding.Left - Padding.Right - FrameSpace.Left - FrameSpace.Right; // ViewportWidth
             var containerHeight = ActualHeight - Padding.Top - Padding.Bottom - FrameSpace.Top - FrameSpace.Bottom; // ViewportHeight
@@ -453,7 +460,7 @@ namespace PdfiumViewer
         }
         protected void SetMouseWheelDelta(int delta)
         {
-            MouseWheelUpdateTime = Environment.TickCount64;
+            MouseWheelUpdateTime = Environment.TickCount;
             MouseWheelDelta = delta;
         }
         protected virtual void Dispose(bool disposing)

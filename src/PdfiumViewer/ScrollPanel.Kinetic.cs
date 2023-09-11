@@ -93,7 +93,7 @@ namespace PdfiumViewer
         {
             base.OnPreviewMouseUp(e);
 
-            if (EnableKinetic)
+            if (EnableKinetic && _isMouseDown)
             {
                 Cursor = Cursors.Hand;
                 _isMouseDown = false;
@@ -130,7 +130,7 @@ namespace PdfiumViewer
         {
             for (var i = 0; i < InertiaMaxAnimationTime / InertiaHandlerInterval; i++)
             {
-                if (_isMouseDown || _velocity.Length <= 1 || Environment.TickCount64 - MouseWheelUpdateTime < InertiaHandlerInterval * 2)
+                if (_isMouseDown || _velocity.Length <= 1 || Environment.TickCount - MouseWheelUpdateTime < InertiaHandlerInterval * 2)
                     break;
 
                 ScrollToHorizontalOffset(_scrollTarget.X);

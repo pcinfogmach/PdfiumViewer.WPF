@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30128.74
+# Visual Studio 15
+VisualStudioVersion = 15.0.33801.198
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfiumViewer", "PdfiumViewer\PdfiumViewer.csproj", "{F4E1CB41-983F-40AD-8889-38C4F655D3AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfiumViewer", "PdfiumViewer\PdfiumViewer.csproj", "{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfiumViewer.Demo", "PdfiumViewer.Demo\PdfiumViewer.Demo.csproj", "{ECD0ED77-6FD9-4A3F-9115-8A8362C1E14B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfiumViewer.Demo", "PdfiumViewer.Demo\PdfiumViewer.Demo.csproj", "{679DE5DB-7388-4CF5-BED2-0F890F0AC2B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F4E1CB41-983F-40AD-8889-38C4F655D3AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F4E1CB41-983F-40AD-8889-38C4F655D3AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F4E1CB41-983F-40AD-8889-38C4F655D3AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F4E1CB41-983F-40AD-8889-38C4F655D3AE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ECD0ED77-6FD9-4A3F-9115-8A8362C1E14B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECD0ED77-6FD9-4A3F-9115-8A8362C1E14B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ECD0ED77-6FD9-4A3F-9115-8A8362C1E14B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ECD0ED77-6FD9-4A3F-9115-8A8362C1E14B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{679DE5DB-7388-4CF5-BED2-0F890F0AC2B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{679DE5DB-7388-4CF5-BED2-0F890F0AC2B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{679DE5DB-7388-4CF5-BED2-0F890F0AC2B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{679DE5DB-7388-4CF5-BED2-0F890F0AC2B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

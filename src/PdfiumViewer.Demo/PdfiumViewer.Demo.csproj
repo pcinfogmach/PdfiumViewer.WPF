@@ -1,135 +1,151 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{679DE5DB-7388-4CF5-BED2-0F890F0AC2B8}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
-    <Version>1.0.5</Version>
-    <PackageReleaseNotes>Added bookmarks list and kinetic scroll on PDF</PackageReleaseNotes>
-    <Description>Demo of PDF viewer based on Google's PDFium.</Description>
-    <Copyright>Copyright © 2019-2020 Behzad Khosravifar</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/bezzad/PdfiumViewer</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/bezzad/PdfiumViewer.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>pdfium pdf-viewer wpf-controls dotnet-core google-pdf-viewer chrome-pdf</PackageTags>
+    <RootNamespace>PdfiumViewer.Demo</RootNamespace>
+    <AssemblyName>PdfiumViewer.Demo</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
-    <None Remove="Resources\close_pdf.png" />
-    <None Remove="Resources\continuous_mode.png" />
-    <None Remove="Resources\find.png" />
-    <None Remove="Resources\fit_height.png" />
-    <None Remove="Resources\fit_width.png" />
-    <None Remove="Resources\hand_cursor.png" />
-    <None Remove="Resources\info.png" />
-    <None Remove="Resources\ltr.png" />
-    <None Remove="Resources\next.png" />
-    <None Remove="Resources\one_page.png" />
-    <None Remove="Resources\open_pdf.png" />
-    <None Remove="Resources\prev.png" />
-    <None Remove="Resources\render_all_pages.png" />
-    <None Remove="Resources\rotate_left.png" />
-    <None Remove="Resources\rotate_right.png" />
-    <None Remove="Resources\rtl.png" />
-    <None Remove="Resources\save.png" />
-    <None Remove="Resources\show_bookmarks.png" />
-    <None Remove="Resources\show_text.png" />
-    <None Remove="Resources\transparent.png" />
-    <None Remove="Resources\two_page.png" />
-    <None Remove="Resources\zoom_in.png" />
-    <None Remove="Resources\zoom_out.png" />
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.39\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
-    <PackageReference Include="PropertyChanged.Fody" Version="3.2.8" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\PdfiumViewer\PdfiumViewer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Resources\close_pdf.png" />
-    <Resource Include="Resources\continuous_mode.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\find.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\fit_height.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\fit_width.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\hand_cursor.png" />
-    <Resource Include="Resources\info.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\ltr.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\next.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\one_page.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\open_pdf.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\prev.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\render_all_pages.png" />
-    <Resource Include="Resources\rotate_left.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\rotate_right.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\rtl.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\save.png" />
-    <Resource Include="Resources\show_bookmarks.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\show_text.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\transparent.png" />
-    <Resource Include="Resources\two_page.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\zoom_in.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\zoom_out.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TextViewer.xaml.cs">
+      <DependentUpon>TextViewer.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
+    <Compile Include="Converters\AllowableCharactersTextBoxBehavior.cs" />
+    <Compile Include="Converters\BehaviorForStyle.cs" />
+    <Compile Include="Converters\BindSelectedItemBehavior.cs" />
+    <Compile Include="Converters\IconToImageSourceConverter.cs" />
+    <Compile Include="Converters\MathConverter.cs" />
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
-
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\close_pdf.png" />
+    <Resource Include="Resources\continuous_mode.png" />
+    <Resource Include="Resources\find.png" />
+    <Resource Include="Resources\fit_height.png" />
+    <Resource Include="Resources\fit_width.png" />
+    <Resource Include="Resources\hand_cursor.png" />
+    <Resource Include="Resources\info.png" />
+    <Resource Include="Resources\ltr.png" />
+    <Resource Include="Resources\next.png" />
+    <Resource Include="Resources\one_page.png" />
+    <Resource Include="Resources\open_pdf.png" />
+    <Resource Include="Resources\prev.png" />
+    <Resource Include="Resources\render_all_pages.png" />
+    <Resource Include="Resources\rotate_left.png" />
+    <Resource Include="Resources\rotate_right.png" />
+    <Resource Include="Resources\rtl.png" />
+    <Resource Include="Resources\save.png" />
+    <Resource Include="Resources\show_bookmarks.png" />
+    <Resource Include="Resources\show_text.png" />
+    <Resource Include="Resources\transparent.png" />
+    <Resource Include="Resources\two_page.png" />
+    <Resource Include="Resources\zoom_in.png" />
+    <Resource Include="Resources\zoom_out.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TextViewer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PdfiumViewer\PdfiumViewer.csproj">
+      <Project>{60d3c75c-e71d-4116-bd7e-cac68c4dd96b}</Project>
+      <Name>PdfiumViewer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

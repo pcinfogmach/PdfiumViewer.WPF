@@ -1,37 +1,108 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\PdfiumViewer.Native.x86.v8-xfa.2018.4.8.256\build\PdfiumViewer.Native.x86.v8-xfa.props" Condition="Exists('..\packages\PdfiumViewer.Native.x86.v8-xfa.2018.4.8.256\build\PdfiumViewer.Native.x86.v8-xfa.props')" />
+  <Import Project="..\packages\PdfiumViewer.Native.x86_64.v8-xfa.2018.4.8.256\build\PdfiumViewer.Native.x86_64.v8-xfa.props" Condition="Exists('..\packages\PdfiumViewer.Native.x86_64.v8-xfa.2018.4.8.256\build\PdfiumViewer.Native.x86_64.v8-xfa.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net5.0-windows</TargetFrameworks>
-    <UseWPF>true</UseWPF>
-    <Version>1.0.6</Version>
-    <Authors>Behzad Khosravifar</Authors>
-    <Description>PDF viewer based on Google's PDFium port to .Net Core.</Description>
-    <Copyright>Copyright © 2019-2020 Behzad Khosravifar</Copyright>
-    <PackageProjectUrl>https://github.com/bezzad/PdfiumViewer</PackageProjectUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/bezzad/PdfiumViewer.git</RepositoryUrl>
-    <PackageTags>pdfium pdf-viewer wpf-controls dotnet-core google-pdf-viewer chrome-pdf</PackageTags>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
-    <PackageId>PdfiumViewer.WPF</PackageId>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReleaseNotes>.Net 5 Support</PackageReleaseNotes>
-    <AssemblyVersion>1.0.6.0</AssemblyVersion>
-    <FileVersion>1.0.6.0</FileVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PdfiumViewer</RootNamespace>
+    <AssemblyName>PdfiumViewer</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="PdfiumViewer.Native.x86.v8-xfa" Version="2018.4.8.256" />
-    <PackageReference Include="PdfiumViewer.Native.x86_64.v8-xfa" Version="2018.4.8.256" />
-    <PackageReference Include="PropertyChanged.Fody" Version="3.2.8" />
-    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
-
   <ItemGroup>
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <Compile Include="Core\IPdfMarker.cs" />
+    <Compile Include="Core\NativeMethods.cs" />
+    <Compile Include="Core\NativeMethods.Pdfium.cs" />
+    <Compile Include="Core\PdfBookmarkCollection.cs" />
+    <Compile Include="Core\PdfDocument.cs" />
+    <Compile Include="Core\PdfException.cs" />
+    <Compile Include="Core\PdfFile.cs" />
+    <Compile Include="Core\PdfInformation.cs" />
+    <Compile Include="Core\PdfiumResolveEventHandler.cs" />
+    <Compile Include="Core\PdfiumResolver.cs" />
+    <Compile Include="Core\PdfLibrary.cs" />
+    <Compile Include="Core\PdfMarker.cs" />
+    <Compile Include="Core\PdfMarkerCollection.cs" />
+    <Compile Include="Core\PdfMatch.cs" />
+    <Compile Include="Core\PdfMatches.cs" />
+    <Compile Include="Core\PdfPageLink.cs" />
+    <Compile Include="Core\PdfPageLinks.cs" />
+    <Compile Include="Core\PdfPrintDocument.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Core\PdfPrintMultiplePages.cs" />
+    <Compile Include="Core\PdfPrintSettings.cs" />
+    <Compile Include="Core\PdfSearchManager.cs" />
+    <Compile Include="Drawing\PdfRectangle.cs" />
+    <Compile Include="Drawing\PdfTextSpan.cs" />
+    <Compile Include="Enums\MouseWheelMode.cs" />
+    <Compile Include="Enums\PdfError.cs" />
+    <Compile Include="Enums\PdfPrintMode.cs" />
+    <Compile Include="Enums\PdfRenderFlags.cs" />
+    <Compile Include="Enums\PdfRotation.cs" />
+    <Compile Include="Enums\PdfViewerPagesDisplayMode.cs" />
+    <Compile Include="Enums\PdfViewerZoomMode.cs" />
+    <Compile Include="Enums\ScrollAction.cs" />
+    <Compile Include="Helpers\BitmapHelper.cs" />
+    <Compile Include="Helpers\StreamManager.cs" />
+    <Compile Include="Helpers\VisualHelper.cs" />
+    <Compile Include="IPdfDocument.cs" />
+    <Compile Include="PdfRenderer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScrollPanel.cs" />
+    <Compile Include="ScrollPanel.Kinetic.cs" />
+    <Compile Include="ScrollPanel.PdfDocument.cs" />
+    <Compile Include="ScrollPanel.Zooming.cs" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\PdfiumViewer.Native.x86_64.v8-xfa.2018.4.8.256\build\PdfiumViewer.Native.x86_64.v8-xfa.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\PdfiumViewer.Native.x86_64.v8-xfa.2018.4.8.256\build\PdfiumViewer.Native.x86_64.v8-xfa.props'))" />
+    <Error Condition="!Exists('..\packages\PdfiumViewer.Native.x86.v8-xfa.2018.4.8.256\build\PdfiumViewer.Native.x86.v8-xfa.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\PdfiumViewer.Native.x86.v8-xfa.2018.4.8.256\build\PdfiumViewer.Native.x86.v8-xfa.props'))" />
+  </Target>
 </Project>
