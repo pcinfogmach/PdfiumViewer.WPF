@@ -1,16 +1,11 @@
-[![NuGet](https://img.shields.io/nuget/dt/PdfiumViewer.WPF.svg)](https://www.nuget.org/packages/PdfiumViewer.WPF) 
-[![NuGet](https://img.shields.io/nuget/vpre/PdfiumViewer.WPF.svg)](https://www.nuget.org/packages/PdfiumViewer.WPF)
-
-# PdfiumViewer
+# PdfiumViewer.WPF
 
 Apache 2.0 License.
 
-> Note: this is a .Net Core WPF port of [PdfiumViewer](https://github.com/pvginkel/PdfiumViewer)
+> Note: this is a fork of bezzad/PdfiumViewer project for .NET Framework 4.8 and compatible with VS2017.
+[bezzad/PdfiumViewer](https://github.com/bezzad/PdfiumViewer) is a .Net Core WPF port of [pvginkel/PdfiumViewer](https://github.com/pvginkel/PdfiumViewer)
 
-
-[Download from NuGet](http://nuget.org/packages/PdfiumViewer.WPF).
-
-[Download Portabl PdfiumViewer WPF Demo](https://drive.google.com/file/d/1Y-KmnIeV1JKZDK6igNk0E8-OqoeziDlw/view?usp=sharing)
+I am going to implement search and text select features, as well as fix some bugs.
 
 ![PdfiumViewer.WPF](https://raw.githubusercontent.com/bezzad/PdfiumViewer/master/screenshot.png)
 
@@ -72,7 +67,7 @@ libraries are located in the `PdfiumViewer-...` target directories.
 
 ## Bugs
 
-Bugs should be reported through github at [http://github.com/bezzad/PdfiumViewer/issues](http://github.com/bezzad/PdfiumViewer/issues).
+Bugs should be reported through github at [https://github.com/majkimester/PdfiumViewer.WPF/issues](https://github.com/majkimester/PdfiumViewer.WPF/issues).
 
 ## License
 
