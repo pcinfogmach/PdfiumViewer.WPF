@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using Image = System.Windows.Controls.Image;
@@ -62,10 +63,10 @@ namespace PdfiumViewer
 
             ZoomMode = PdfViewerZoomMode.FitHeight;
             Rotate = PdfRotation.Rotate0;
-            Flags = PdfRenderFlags.None;
+            Flags = PdfRenderFlags.CorrectFromDpi;
             PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
             MouseWheelMode = MouseWheelMode.PanAndZoom;
-            Dpi = 96;
+            Dpi = (int)VisualTreeHelper.GetDpi(this).PixelsPerInchX;
             ScrollWidth = 50;
             Zoom = 1;
             ZoomMin = DefaultZoomMin;
@@ -470,22 +471,22 @@ namespace PdfiumViewer
                 {
                     case ScrollAction.LineUp:
                         if (HorizontalOffset > SmallScrollChange)
-                            ScrollToVerticalOffset(HorizontalOffset - SmallScrollChange);
+                            ScrollToHorizontalOffset(HorizontalOffset - SmallScrollChange);
                         break;
 
                     case ScrollAction.LineDown:
                         if (HorizontalOffset < ScrollableHeight - SmallScrollChange)
-                            ScrollToVerticalOffset(HorizontalOffset + SmallScrollChange);
+                            ScrollToHorizontalOffset(HorizontalOffset + SmallScrollChange);
                         break;
 
                     case ScrollAction.PageUp:
                         if (HorizontalOffset > LargeScrollChange)
-                            ScrollToVerticalOffset(HorizontalOffset - LargeScrollChange);
+                            ScrollToHorizontalOffset(HorizontalOffset - LargeScrollChange);
                         break;
 
                     case ScrollAction.PageDown:
                         if (HorizontalOffset < ScrollableHeight - LargeScrollChange)
-                            ScrollToVerticalOffset(HorizontalOffset + LargeScrollChange);
+                            ScrollToHorizontalOffset(HorizontalOffset + LargeScrollChange);
                         break;
 
                     case ScrollAction.Home:
