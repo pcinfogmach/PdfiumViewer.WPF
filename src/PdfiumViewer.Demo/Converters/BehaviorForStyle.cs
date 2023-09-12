@@ -14,7 +14,7 @@ namespace PdfiumViewer.Demo.Converters
         where TBehavior : BehaviorForStyle<TTarget, TBehavior>, new()
     {
         public static readonly DependencyProperty IsEnabledForStyleProperty =
-            DependencyProperty.RegisterAttached("IsEnabledForStyle",
+            DependencyProperty.RegisterAttached(nameof(IsEnabledForStyle),
                 typeof(bool),
                 typeof(BehaviorForStyle<TTarget, TBehavior>),
                 new FrameworkPropertyMetadata(false, OnIsEnabledForStyleChanged));

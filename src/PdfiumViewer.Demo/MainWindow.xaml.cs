@@ -428,8 +428,6 @@ namespace PdfiumViewer.Demo
    
         private void ThumbnailRenderer_MouseClick(object sender, EventArgs e)
         {
-            var u = e.GetType();
-            var wu = ThumbnailRenderer.ScrollableHeight;
             var i = Mouse.GetPosition(Application.Current.MainWindow);
             int index = (int)(((int)_thumbnailViewVerticalOffset + i.Y - 50) / (ThumbnailRenderer.CurrentPageSize.Height + 10));
             Renderer.GotoPage(index);

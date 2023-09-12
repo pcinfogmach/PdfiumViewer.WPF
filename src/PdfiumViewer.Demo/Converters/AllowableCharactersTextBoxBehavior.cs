@@ -10,7 +10,7 @@ namespace PdfiumViewer.Demo.Converters
     public class AllowableCharactersTextBoxBehavior : Behavior<TextBox>
     {
         public static readonly DependencyProperty RegularExpressionProperty =
-             DependencyProperty.Register("RegularExpression", typeof(string), typeof(AllowableCharactersTextBoxBehavior),
+             DependencyProperty.Register(nameof(RegularExpression), typeof(string), typeof(AllowableCharactersTextBoxBehavior),
              new FrameworkPropertyMetadata(".*"));
         public string RegularExpression
         {
@@ -19,7 +19,7 @@ namespace PdfiumViewer.Demo.Converters
         }
 
         public static readonly DependencyProperty MaxLengthProperty =
-            DependencyProperty.Register("MaxLength", typeof(int), typeof(AllowableCharactersTextBoxBehavior),
+            DependencyProperty.Register(nameof(MaxLength), typeof(int), typeof(AllowableCharactersTextBoxBehavior),
             new FrameworkPropertyMetadata(int.MinValue));
         public int MaxLength
         {
@@ -51,7 +51,7 @@ namespace PdfiumViewer.Demo.Converters
             }
         }
 
-        void OnPreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        void OnPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsValid(e.Text, false);
         }
