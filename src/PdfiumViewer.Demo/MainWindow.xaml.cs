@@ -22,6 +22,25 @@ namespace PdfiumViewer.Demo
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        #region INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (Equals(storage, value)) return false;
+            storage = value;
+            this.OnPropertyChanged(propertyName);
+            return true;
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
         public MainWindow()
         {
             InitializeComponent();
@@ -53,7 +72,10 @@ namespace PdfiumViewer.Demo
         private CancellationTokenSource Cts { get; }
         private System.Windows.Threading.DispatcherTimer MemoryChecker { get; }
         private PdfSearchManager SearchManager { get; }
-        public string InfoText { get; set; }
+
+        public string InfoText { get => _infoText; protected set => SetProperty(ref _infoText, value); }
+        private string _infoText;
+
         public string SearchTerm { get; set; }
         public PdfBookmarkCollection Bookmarks { get; set; }
         public bool ShowBookmarks { get; set; }
@@ -63,7 +85,10 @@ namespace PdfiumViewer.Demo
             get => Renderer.Zoom * 100;
             set => Renderer.SetZoom(value / 100);
         }
-        public bool IsSearchOpen { get; set; }
+
+        public bool IsSearchOpen { get => _isSearchOpen; set => SetProperty(ref _isSearchOpen, value); }
+        private bool _isSearchOpen;
+
         public int SearchMatchItemNo { get; set; }
         public int SearchMatchesCount { get; set; }
         public int Page
@@ -82,7 +107,6 @@ namespace PdfiumViewer.Demo
         {
             CurrentProcess.Refresh();
             InfoText = $"Memory: {CurrentProcess.PrivateMemorySize64 / 1024 / 1024} MB";
-            OnPropertyChanged(nameof(InfoText));
         }
 
 
@@ -204,13 +228,7 @@ namespace PdfiumViewer.Demo
         {
             Renderer.PagesDisplayMode = PdfViewerPagesDisplayMode.SinglePageMode;
         }
-        public event PropertyChangedEventHandler PropertyChanged;
 
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
         private void OnTransparent(object sender, RoutedEventArgs e)
         {
             if ((Renderer.Flags & PdfRenderFlags.Transparent) != 0)
@@ -225,7 +243,6 @@ namespace PdfiumViewer.Demo
         private void OpenCloseSearch(object sender, RoutedEventArgs e)
         {
             IsSearchOpen = !IsSearchOpen;
-            OnPropertyChanged(nameof(IsSearchOpen));
         }
         private void OnSearchTermKeyDown(object sender, KeyEventArgs e)
         {

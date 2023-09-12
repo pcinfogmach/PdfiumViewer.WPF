@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,6 +22,25 @@ namespace PdfiumViewer
     // ScrollPanel.Properties
     public partial class ScrollPanel : ScrollViewer, IPdfDocument, INotifyPropertyChanged
     {
+        #region INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (Equals(storage, value)) return false;
+            storage = value;
+            this.OnPropertyChanged(propertyName);
+            return true;
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
         public ScrollPanel()
         {
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
@@ -68,15 +88,35 @@ namespace PdfiumViewer
         protected Image Frame1 => Frames?.FirstOrDefault();
         protected Image Frame2 => Frames?.Length > 1 ? Frames[1] : null;
         protected Image[] Frames { get; set; }
-        public Size CurrentPageSize { get; set; }
         protected int ScrollWidth { get; set; }
         protected int MouseWheelDelta { get; set; }
         protected long MouseWheelUpdateTime { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public PdfDocument Document { get; set; }
-        public int PageNo { get; protected set; }
-        public int Dpi { get; set; }
+        /// <summary>
+        /// Current document
+        /// </summary>
+        public PdfDocument Document {
+            get => _document;
+            set {
+                SetProperty(ref _document, value);
+                OnPropertyChanged(nameof(PageCount));
+                OnPropertyChanged(nameof(IsDocumentLoaded));
+            }
+        }
+        private PdfDocument _document;
+
+        /// <summary>
+        /// Total number of pages
+        /// </summary>
+        public int PageNo { get => _pageNo; protected set => SetProperty(ref _pageNo, value); }
+        private int _pageNo;
+
+        public Size CurrentPageSize { get => _currentPageSize; set => SetProperty(ref _currentPageSize, value); }
+        private Size _currentPageSize;
+
+        public int Dpi { get => _dpi; set => SetProperty(ref _dpi, value); }
+        private int _dpi;
+
         public PdfViewerZoomMode ZoomMode { get; protected set; }
         public PdfRenderFlags Flags { get; set; }
         public PdfRotation Rotate { get; set; }
