@@ -139,48 +139,61 @@ namespace PdfiumViewer.Demo
 
             if (dialog.ShowDialog() == true)
             {
+                _thumbnailFilename = dialog.FileName;
                 Renderer.OpenPdf(new FileStream(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
             }
         }
+
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
 
             MemoryChecker?.Stop();
             Renderer?.Dispose();
+            ThumbnailRenderer?.Dispose();
+            _thumbnailFilename = null;
         }
+
         private void OnPrevPageClick(object sender, RoutedEventArgs e)
         {
             Renderer.PreviousPage();
         }
+
         private void OnNextPageClick(object sender, RoutedEventArgs e)
         {
             Renderer.NextPage();
         }
+
         private void OnFitWidth(object sender, RoutedEventArgs e)
         {
             Renderer.SetZoomMode(PdfViewerZoomMode.FitWidth);
         }
+
         private void OnFitHeight(object sender, RoutedEventArgs e)
         {
             Renderer.SetZoomMode(PdfViewerZoomMode.FitHeight);
         }
+
         private void OnZoomInClick(object sender, RoutedEventArgs e)
         {
             Renderer.ZoomIn();
         }
+
         private void OnZoomOutClick(object sender, RoutedEventArgs e)
         {
             Renderer.ZoomOut();
         }
+
         private void OnRotateLeftClick(object sender, RoutedEventArgs e)
         {
             Renderer.Counterclockwise();
         }
+
         private void OnRotateRightClick(object sender, RoutedEventArgs e)
         {
             Renderer.ClockwiseRotate();
         }
+
         private void OnInfo(object sender, RoutedEventArgs e)
         {
             var info = Renderer.GetInformation();
@@ -199,6 +212,7 @@ namespace PdfiumViewer.Demo
                 MessageBox.Show(sb.ToString(), "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
         private void OnGetText(object sender, RoutedEventArgs e)
         {
             var txtViewer = new TextViewer();
@@ -207,20 +221,24 @@ namespace PdfiumViewer.Demo
             txtViewer.Caption = $"Page {page + 1} contains {txtViewer.Body?.Length} character(s):";
             txtViewer.ShowDialog();
         }
+
         private void OnDisplayBookmarks(object sender, RoutedEventArgs e)
         {
             Bookmarks = Renderer.Bookmarks;
             if (Bookmarks?.Count > 0)
                 ShowBookmarks = !ShowBookmarks;
         }
+
         private void OnContinuousModeClick(object sender, RoutedEventArgs e)
         {
             Renderer.PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
         }
+
         private void OnBookModeClick(object sender, RoutedEventArgs e)
         {
             Renderer.PagesDisplayMode = PdfViewerPagesDisplayMode.BookMode;
         }
+
         private void OnSinglePageModeClick(object sender, RoutedEventArgs e)
         {
             Renderer.PagesDisplayMode = PdfViewerPagesDisplayMode.SinglePageMode;
@@ -237,10 +255,12 @@ namespace PdfiumViewer.Demo
                 Renderer.Flags |= PdfRenderFlags.Transparent;
             }
         }
+
         private void OpenCloseSearch(object sender, RoutedEventArgs e)
         {
             IsSearchOpen = !IsSearchOpen;
         }
+
         private void OnSearchTermKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -248,6 +268,7 @@ namespace PdfiumViewer.Demo
                 Search();
             }
         }
+
         private void SaveAsImages(object sender, RoutedEventArgs e)
         {
             // Create a "Save As" dialog for selecting a directory (HACK)
@@ -383,5 +404,44 @@ namespace PdfiumViewer.Demo
             if (SelectedBookIndex != null)
                 Renderer.GotoPage(SelectedBookIndex.PageIndex);
         }
+
+        #region Thumbnail view
+
+        private string _thumbnailFilename = null;
+        private double _thumbnailViewVerticalOffset;
+
+        public bool IsThumbnailOpen { get => _isThumbnailOpen; set => SetProperty(ref _isThumbnailOpen, value); }
+        private bool _isThumbnailOpen;
+
+        private void OpenThumbnail(object sender, RoutedEventArgs e)
+        {
+            IsThumbnailOpen = !IsThumbnailOpen;
+            if (IsThumbnailOpen && !ThumbnailRenderer.IsDocumentLoaded)
+            {
+                ThumbnailRenderer.OpenPdf(new FileStream(_thumbnailFilename, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                ThumbnailRenderer.PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
+                ThumbnailRenderer.SetZoom(0.16);
+                _thumbnailViewVerticalOffset = 0;
+            }
+        }
+   
+        private void ThumbnailRenderer_MouseClick(object sender, EventArgs e)
+        {
+            var u = e.GetType();
+            var wu = ThumbnailRenderer.ScrollableHeight;
+            var i = Mouse.GetPosition(Application.Current.MainWindow);
+            int index = (int)(((int)_thumbnailViewVerticalOffset + i.Y - 50) / (ThumbnailRenderer.CurrentPageSize.Height + 10));
+            Renderer.GotoPage(index);
+        }
+
+        private void ThumbnailRenderer_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        {
+            _thumbnailViewVerticalOffset = +e.VerticalOffset;
+            if (_thumbnailViewVerticalOffset < 0)
+                _thumbnailViewVerticalOffset = 0;
+        }
+
+        #endregion
     }
 }
