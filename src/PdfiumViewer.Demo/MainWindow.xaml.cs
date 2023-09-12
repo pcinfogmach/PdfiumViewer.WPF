@@ -443,5 +443,41 @@ namespace PdfiumViewer.Demo
         }
 
         #endregion
+
+        #region Print 
+
+        private void OnPrint(object sender, RoutedEventArgs e)
+        {
+            var pdfDocument = Renderer.Document;
+            if (pdfDocument == null) return;
+
+            using (var printDialog = new System.Windows.Forms.PrintDialog())
+            using (var printDocument = pdfDocument.CreatePrintDocument())
+            {
+                printDialog.AllowSomePages = true;
+                printDialog.Document = printDocument;
+                printDialog.UseEXDialog = true;
+                printDialog.Document.PrinterSettings.FromPage = 1;
+                printDialog.Document.PrinterSettings.ToPage = pdfDocument.PageCount;
+                printDialog.Document.PrinterSettings.PrinterName = printDialog.PrinterSettings.PrinterName;
+
+                if (printDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    try
+                    {
+                        if (printDialog.Document.PrinterSettings.FromPage <= pdfDocument.PageCount)
+                        {
+                            printDialog.Document.Print();
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore exceptions; the printer dialog should take care of this.
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

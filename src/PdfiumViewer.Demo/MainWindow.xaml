@@ -209,6 +209,9 @@
             <Button ToolTip="Get Page Text" Click="OnGetText">
                 <Image Source="Resources/show_text.png" />
             </Button>
+            <Button ToolTip="Print" Click="OnPrint">
+                <Image Source="Resources/print.png" />
+            </Button>
             <Button ToolTip="Pdf Information" Click="OnInfo">
                 <Image Source="Resources/info.png" />
             </Button>
