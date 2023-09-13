@@ -82,8 +82,7 @@ namespace PdfiumViewer
         public const double DefaultZoomMax = 5;
         public const double DefaultZoomFactor = 1.2;
         protected bool IsDisposed;
-        protected const int SmallScrollChange = 1;
-        protected const int LargeScrollChange = 10;
+        protected const int ScrollChangeLine = 16;
         protected Process CurrentProcess { get; } = Process.GetCurrentProcess();
         protected StackPanel Panel { get; set; }
         protected Thickness FrameSpace { get; set; }
@@ -122,7 +121,18 @@ namespace PdfiumViewer
         public PdfViewerZoomMode ZoomMode { get; protected set; }
         public PdfRenderFlags Flags { get; set; }
         public PdfRotation Rotate { get; set; }
-        public PdfViewerPagesDisplayMode PagesDisplayMode { get; set; }
+
+        public PdfViewerPagesDisplayMode PagesDisplayMode {
+            get => _pdfViewerPagesDisplayMode;
+            set {
+                if (SetProperty(ref _pdfViewerPagesDisplayMode, value))
+                {
+                    OnPagesDisplayModeChanged();
+                }
+            }
+        }
+        private PdfViewerPagesDisplayMode _pdfViewerPagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
+
         public MouseWheelMode MouseWheelMode { get; set; }
         public bool IsRightToLeft
         {
@@ -455,13 +465,13 @@ namespace PdfiumViewer
                 switch (action)
                 {
                     case ScrollAction.LineUp:
-                        if (VerticalOffset > SmallScrollChange)
-                            ScrollToVerticalOffset(VerticalOffset - SmallScrollChange);
+                        if (VerticalOffset > ScrollChangeLine)
+                            ScrollToVerticalOffset(VerticalOffset - ScrollChangeLine);
                         break;
 
                     case ScrollAction.LineDown:
-                        if (VerticalOffset < ScrollableHeight - SmallScrollChange)
-                            ScrollToVerticalOffset(VerticalOffset + SmallScrollChange);
+                        if (VerticalOffset < ScrollableHeight - ScrollChangeLine)
+                            ScrollToVerticalOffset(VerticalOffset + ScrollChangeLine);
                         break;
 
                     case ScrollAction.PageUp:
@@ -471,8 +481,11 @@ namespace PdfiumViewer
                         }
                         else
                         {
-                            if (VerticalOffset > LargeScrollChange)
-                                ScrollToVerticalOffset(VerticalOffset - LargeScrollChange);
+                            var offset = ActualHeight - Margin.Top - Margin.Bottom - FrameSpace.Top - FrameSpace.Bottom;
+                            if (VerticalOffset > offset)
+                                ScrollToVerticalOffset(VerticalOffset - offset);
+                            else
+                                ScrollToVerticalOffset(0);
                         }
                         break;
 
@@ -483,8 +496,11 @@ namespace PdfiumViewer
                         }
                         else
                         {
-                            if (VerticalOffset < ScrollableHeight - LargeScrollChange)
-                                ScrollToVerticalOffset(VerticalOffset + LargeScrollChange);
+                            var offset = ActualHeight - Margin.Top - Margin.Bottom - FrameSpace.Top - FrameSpace.Bottom;
+                            if (VerticalOffset < ScrollableHeight - offset)
+                                ScrollToVerticalOffset(VerticalOffset + offset);
+                            else
+                                ScrollToVerticalOffset(ScrollableHeight);
                         }
                         break;
 
@@ -502,23 +518,29 @@ namespace PdfiumViewer
                 switch (action)
                 {
                     case ScrollAction.LineUp:
-                        if (HorizontalOffset > SmallScrollChange)
-                            ScrollToHorizontalOffset(HorizontalOffset - SmallScrollChange);
+                        if (HorizontalOffset > ScrollChangeLine)
+                            ScrollToHorizontalOffset(HorizontalOffset - ScrollChangeLine);
                         break;
 
                     case ScrollAction.LineDown:
-                        if (HorizontalOffset < ScrollableHeight - SmallScrollChange)
-                            ScrollToHorizontalOffset(HorizontalOffset + SmallScrollChange);
+                        if (HorizontalOffset < ScrollableHeight - ScrollChangeLine)
+                            ScrollToHorizontalOffset(HorizontalOffset + ScrollChangeLine);
                         break;
 
                     case ScrollAction.PageUp:
-                        if (HorizontalOffset > LargeScrollChange)
-                            ScrollToHorizontalOffset(HorizontalOffset - LargeScrollChange);
+                        var offset = ActualWidth - Margin.Left - Margin.Right - FrameSpace.Left - FrameSpace.Right;
+                        if (HorizontalOffset > offset)
+                            ScrollToHorizontalOffset(HorizontalOffset - offset);
+                        else
+                            ScrollToHorizontalOffset(0);
                         break;
 
                     case ScrollAction.PageDown:
-                        if (HorizontalOffset < ScrollableHeight - LargeScrollChange)
-                            ScrollToHorizontalOffset(HorizontalOffset + LargeScrollChange);
+                        offset = ActualWidth - Margin.Left - Margin.Right - FrameSpace.Left - FrameSpace.Right;
+                        if (HorizontalOffset < ScrollableWidth - offset)
+                            ScrollToHorizontalOffset(HorizontalOffset + offset);
+                        else
+                            ScrollToHorizontalOffset(ScrollableWidth);
                         break;
 
                     case ScrollAction.Home:

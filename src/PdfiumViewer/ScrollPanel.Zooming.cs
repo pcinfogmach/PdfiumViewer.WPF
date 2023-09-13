@@ -34,8 +34,11 @@ namespace PdfiumViewer
 
         public void SetZoomMode(PdfViewerZoomMode mode)
         {
-            ZoomMode = mode;
-            OnPagesDisplayModeChanged();
+            if (ZoomMode != mode)
+            {
+                ZoomMode = mode;
+                OnPagesDisplayModeChanged();
+            }
         }
     }
 }

@@ -139,8 +139,16 @@ namespace PdfiumViewer.Demo
 
             if (dialog.ShowDialog() == true)
             {
-                _thumbnailFilename = dialog.FileName;
                 Renderer.OpenPdf(new FileStream(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                // Open Thumbnails
+                ThumbnailRenderer.UnLoad();
+                _thumbnailFilename = dialog.FileName;
+                if (IsThumbnailOpen)
+                {
+                    IsThumbnailOpen = false;
+                    OpenThumbnail(this, null);
+                }
             }
         }
 
