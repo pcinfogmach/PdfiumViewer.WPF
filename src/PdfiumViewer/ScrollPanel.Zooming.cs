@@ -23,9 +23,13 @@ namespace PdfiumViewer
 
         public void SetZoom(double zoom)
         {
-            Zoom = Math.Min(Math.Max(zoom, ZoomMin), ZoomMax);
-            ZoomMode = PdfViewerZoomMode.None;
-            OnPagesDisplayModeChanged();
+            var newZoom = Math.Min(Math.Max(zoom, ZoomMin), ZoomMax);
+            if (newZoom != Zoom)
+            {
+                Zoom = newZoom;
+                ZoomMode = PdfViewerZoomMode.None;
+                OnPagesDisplayModeChanged();
+            }
         }
 
         public void SetZoomMode(PdfViewerZoomMode mode)

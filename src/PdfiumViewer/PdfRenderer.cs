@@ -34,6 +34,7 @@ namespace PdfiumViewer
             OnPagesDisplayModeChanged();
             GotoPage(0);
         }
+
         public void OpenPdf(string path, string password, bool isRightToLeft = false)
         {
             UnLoad();
@@ -42,6 +43,7 @@ namespace PdfiumViewer
             OnPagesDisplayModeChanged();
             GotoPage(0);
         }
+
         public void OpenPdf(Stream stream, bool isRightToLeft = false, int pageNumber = 0)
         {
             UnLoad();
@@ -50,6 +52,7 @@ namespace PdfiumViewer
             OnPagesDisplayModeChanged();
             GotoPage(pageNumber);
         }
+
         public void OpenPdf(Stream stream, string password, bool isRightToLeft = false)
         {
             UnLoad();
@@ -58,6 +61,7 @@ namespace PdfiumViewer
             OnPagesDisplayModeChanged();
             GotoPage(0);
         }
+
         public void UnLoad()
         {
             Document?.Dispose();
@@ -67,6 +71,7 @@ namespace PdfiumViewer
             Panel.Children.Clear();
             GC.Collect();
         }
+
         public void ClockwiseRotate()
         {
             // _____
@@ -91,6 +96,7 @@ namespace PdfiumViewer
                     break;
             }
         }
+
         public void Counterclockwise()
         {
             //      ^
@@ -230,18 +236,18 @@ namespace PdfiumViewer
             }
         }
 
-        
-
         private void Markers_CollectionChanged(object sender, EventArgs e)
         {
             RedrawMarkers();
         }
+
         private void RedrawMarkers()
         {
             _markers = null;
 
             GotoPage(PageNo);
         }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);

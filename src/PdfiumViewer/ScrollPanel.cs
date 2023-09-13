@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Image = System.Windows.Controls.Image;
 using Size = System.Drawing.Size;
 
@@ -145,15 +146,16 @@ namespace PdfiumViewer
 
         protected void ScrollToPage(int page)
         {
+            if (Frames == null) return;
+
             if (PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode)
             {
-                //
                 // scroll to current page
-                //
-                // var pageSize = CalculatePageSize(page);
-                // var verticalOffset = page * (pageSize.Height + FrameSpace.Top + FrameSpace.Bottom);
-                // ScrollToVerticalOffset(verticalOffset);
-                Frames?[page].BringIntoView();
+                double verticalOffset = 0.0;
+                for (int idx = 0; idx < page; idx++) {
+                    verticalOffset += Frames[idx].Height + FrameSpace.Top + FrameSpace.Bottom;
+                }
+                ScrollToVerticalOffset(verticalOffset);
             }
         }
 
@@ -244,7 +246,7 @@ namespace PdfiumViewer
             // In our case caching is impossible, so all it does it cause the load to happen immediately.
 
             stopwatch.Stop();
-            Debug.WriteLine("RenderPage : " + stopwatch.ElapsedMilliseconds + " mS, size=" + width + " x " + height);
+            Debug.WriteLine("RenderPage[" + page + "]: " + stopwatch.ElapsedMilliseconds + " mS, size=" + width + " x " + height);
 
             //CurrentProcess?.Refresh();
             Dispatcher.Invoke(() =>
@@ -350,6 +352,7 @@ namespace PdfiumViewer
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
             base.OnPreviewKeyDown(e);
+            bool handled = true;
 
             if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
                 MouseWheelMode = MouseWheelMode.Zoom;
@@ -358,48 +361,52 @@ namespace PdfiumViewer
             {
                 case Key.Up:
                     PerformScroll(ScrollAction.LineUp, Orientation.Vertical);
-                    return;
+                    break;
 
                 case Key.Down:
                     PerformScroll(ScrollAction.LineDown, Orientation.Vertical);
-                    return;
+                    break;
 
                 case Key.Left:
                     PerformScroll(ScrollAction.LineUp, Orientation.Horizontal);
-                    return;
+                    break;
 
                 case Key.Right:
                     PerformScroll(ScrollAction.LineDown, Orientation.Horizontal);
-                    return;
+                    break;
 
                 case Key.PageUp:
                     PerformScroll(ScrollAction.PageUp, Orientation.Vertical);
-                    return;
+                    break;
 
                 case Key.PageDown:
                     PerformScroll(ScrollAction.PageDown, Orientation.Vertical);
-                    return;
+                    break;
 
                 case Key.Home:
                     PerformScroll(ScrollAction.Home, Orientation.Vertical);
-                    return;
+                    break;
 
                 case Key.End:
                     PerformScroll(ScrollAction.End, Orientation.Vertical);
-                    return;
+                    break;
 
                 case Key.Add:
                 case Key.OemPlus:
                     if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
                         ZoomIn();
-                    return;
+                    break;
 
                 case Key.Subtract:
                 case Key.OemMinus:
                     if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
                         ZoomOut();
-                    return;
+                    break;
+                default:
+                    handled = false;
+                    break;
             }
+            e.Handled = handled;
         }
 
         protected override void OnPreviewKeyUp(KeyEventArgs e)
@@ -458,13 +465,27 @@ namespace PdfiumViewer
                         break;
 
                     case ScrollAction.PageUp:
-                        if (VerticalOffset > LargeScrollChange)
-                            ScrollToVerticalOffset(VerticalOffset - LargeScrollChange);
+                        if (ZoomMode == PdfViewerZoomMode.FitHeight)
+                        {
+                            PreviousPage();
+                        }
+                        else
+                        {
+                            if (VerticalOffset > LargeScrollChange)
+                                ScrollToVerticalOffset(VerticalOffset - LargeScrollChange);
+                        }
                         break;
 
                     case ScrollAction.PageDown:
-                        if (VerticalOffset < ScrollableHeight - LargeScrollChange)
-                            ScrollToVerticalOffset(VerticalOffset + LargeScrollChange);
+                        if (ZoomMode == PdfViewerZoomMode.FitHeight)
+                        {
+                            NextPage();
+                        }
+                        else
+                        {
+                            if (VerticalOffset < ScrollableHeight - LargeScrollChange)
+                                ScrollToVerticalOffset(VerticalOffset + LargeScrollChange);
+                        }
                         break;
 
                     case ScrollAction.Home:

@@ -416,7 +416,7 @@ namespace PdfiumViewer.Demo
         private void OpenThumbnail(object sender, RoutedEventArgs e)
         {
             IsThumbnailOpen = !IsThumbnailOpen;
-            if (IsThumbnailOpen && !ThumbnailRenderer.IsDocumentLoaded)
+            if (IsThumbnailOpen && !ThumbnailRenderer.IsDocumentLoaded && !string.IsNullOrEmpty(_thumbnailFilename))
             {
                 ThumbnailRenderer.OpenPdf(new FileStream(_thumbnailFilename, FileMode.Open, FileAccess.Read, FileShare.Read));
 
