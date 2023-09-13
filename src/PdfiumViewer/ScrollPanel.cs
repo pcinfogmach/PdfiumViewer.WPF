@@ -156,14 +156,17 @@ namespace PdfiumViewer
                 Frames?[page].BringIntoView();
             }
         }
+
         protected void OnPageNoChanged()
         {
             PageChanged?.Invoke(this, PageNo);
         }
+
         protected void OnDpiChanged()
         {
             GotoPage(PageNo);
         }
+
         protected void OnPagesDisplayModeChanged()
         {
             if (IsDocumentLoaded)
@@ -209,10 +212,12 @@ namespace PdfiumViewer
             base.OnMouseLeftButtonDown(e);
             MouseClick?.Invoke(this, EventArgs.Empty);
         }
+
         protected void OnFlagsChanged()
         {
             GotoPage(PageNo);
         }
+
         protected BitmapImage RenderPage(Image frame, int page, int width, int height)
         {
             if (frame == null) return null;
@@ -251,6 +256,7 @@ namespace PdfiumViewer
             GC.Collect();
             return bitmapImage;
         }
+
         protected Size CalculatePageSize(int? page = null)
         {
             page = page ?? PageNo;
@@ -280,6 +286,7 @@ namespace PdfiumViewer
 
             return new Size();
         }
+
         protected void ReleaseFrames(int keepFrom, int keepTo)
         {
             for (var f = 0; f < Frames?.Length; f++)
@@ -296,8 +303,9 @@ namespace PdfiumViewer
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
             base.OnRenderSizeChanged(sizeInfo);
-            GotoPage(PageNo);
+            OnPagesDisplayModeChanged();
         }
+
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
         {
             base.OnPreviewMouseWheel(e);
@@ -338,6 +346,7 @@ namespace PdfiumViewer
                 }
             }
         }
+
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
             base.OnPreviewKeyDown(e);
@@ -392,6 +401,7 @@ namespace PdfiumViewer
                     return;
             }
         }
+
         protected override void OnPreviewKeyUp(KeyEventArgs e)
         {
             base.OnPreviewKeyUp(e);
@@ -400,6 +410,7 @@ namespace PdfiumViewer
                 e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
                 MouseWheelMode = MouseWheelMode.Pan;
         }
+
         protected override void OnScrollChanged(ScrollChangedEventArgs e)
         {
             base.OnScrollChanged(e);
@@ -499,11 +510,13 @@ namespace PdfiumViewer
                 }
             }
         }
+
         protected void SetMouseWheelDelta(int delta)
         {
             MouseWheelUpdateTime = Environment.TickCount;
             MouseWheelDelta = delta;
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)

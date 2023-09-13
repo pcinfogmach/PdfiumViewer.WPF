@@ -143,7 +143,6 @@ namespace PdfiumViewer
             return Document.RectangleFromPdf(page, rect);
         }
 
-
         public void GotoPage(int page)
         {
             if (IsDocumentLoaded)
@@ -161,6 +160,7 @@ namespace PdfiumViewer
                 ScrollToPage(PageNo);
             }
         }
+
         public void NextPage()
         {
             if (IsDocumentLoaded)
@@ -169,6 +169,7 @@ namespace PdfiumViewer
                 GotoPage(Math.Min(Math.Max(PageNo + extentVal, 0), PageCount - extentVal));
             }
         }
+
         public void PreviousPage()
         {
             if (IsDocumentLoaded)
