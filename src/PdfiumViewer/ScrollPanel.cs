@@ -61,19 +61,7 @@ namespace PdfiumViewer
             VirtualizingPanel.SetIsVirtualizing(Panel, true);
             VirtualizingPanel.SetVirtualizationMode(Panel, VirtualizationMode.Recycling);
             Content = Panel;
-
-            ZoomMode = PdfViewerZoomMode.FitHeight;
-            Rotate = PdfRotation.Rotate0;
-            Flags = PdfRenderFlags.CorrectFromDpi;
-            PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
-            MouseWheelMode = MouseWheelMode.PanAndZoom;
             Dpi = (int)VisualTreeHelper.GetDpi(this).PixelsPerInchX;
-            ScrollWidth = 50;
-            Zoom = 1;
-            ZoomMin = DefaultZoomMin;
-            ZoomMax = DefaultZoomMax;
-            ZoomFactor = DefaultZoomFactor;
-            FrameSpace = new Thickness(5);
         }
 
         public event EventHandler<int> PageChanged;
@@ -85,16 +73,16 @@ namespace PdfiumViewer
         protected const int ScrollChangeLine = 16;
         protected Process CurrentProcess { get; } = Process.GetCurrentProcess();
         protected StackPanel Panel { get; set; }
-        protected Thickness FrameSpace { get; set; }
+        protected Thickness FrameSpace { get; set; } = new Thickness(5);
         protected Image Frame1 => Frames?.FirstOrDefault();
         protected Image Frame2 => Frames?.Length > 1 ? Frames[1] : null;
         protected Image[] Frames { get; set; }
-        protected int ScrollWidth { get; set; }
+        protected int ScrollWidth { get; set; } = 50;
         protected int MouseWheelDelta { get; set; }
         protected long MouseWheelUpdateTime { get; set; }
 
         /// <summary>
-        /// Current document
+        /// Current document.
         /// </summary>
         public PdfDocument Document {
             get => _document;
@@ -107,21 +95,51 @@ namespace PdfiumViewer
         private PdfDocument _document;
 
         /// <summary>
-        /// Total number of pages
+        /// Total number of pages.
+        /// </summary>
+        public int PageCount => Document?.PageCount ?? 0;
+        
+        /// <summary>
+        /// Number of the current page.
         /// </summary>
         public int PageNo { get => _pageNo; protected set => SetProperty(ref _pageNo, value); }
         private int _pageNo;
 
+        /// <summary>
+        /// Page sizes.
+        /// </summary>
+        public IList<SizeF> PageSizes => Document?.PageSizes;
+
+        /// <summary>
+        /// Size of the current page.
+        /// </summary>
         public Size CurrentPageSize { get => _currentPageSize; set => SetProperty(ref _currentPageSize, value); }
         private Size _currentPageSize;
 
+        /// <summary>
+        /// Pixel density.
+        /// </summary>
         public int Dpi { get => _dpi; set => SetProperty(ref _dpi, value); }
         private int _dpi;
 
-        public PdfViewerZoomMode ZoomMode { get; protected set; }
-        public PdfRenderFlags Flags { get; set; }
-        public PdfRotation Rotate { get; set; }
+        /// <summary>
+        /// Zoom mode (FitHeight, FitWidth or None)
+        /// </summary>
+        public PdfViewerZoomMode ZoomMode { get; protected set; } = PdfViewerZoomMode.FitHeight;
 
+        /// <summary>
+        /// Pdf rendering flags
+        /// </summary>
+        public PdfRenderFlags Flags { get; set; } = PdfRenderFlags.CorrectFromDpi;
+
+        /// <summary>
+        /// Page rotation.
+        /// </summary>
+        public PdfRotation Rotate { get; set; } = PdfRotation.Rotate0;
+
+        /// <summary>
+        /// Page display mode (SinglePageMode, BookMode or ContinuousMode)
+        /// </summary>
         public PdfViewerPagesDisplayMode PagesDisplayMode {
             get => _pdfViewerPagesDisplayMode;
             set {
@@ -133,27 +151,56 @@ namespace PdfiumViewer
         }
         private PdfViewerPagesDisplayMode _pdfViewerPagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
 
-        public MouseWheelMode MouseWheelMode { get; set; }
+        /// <summary>
+        /// Mouse wheel mode (PanAndZoom, Pan or Zoom)
+        /// </summary>
+        public MouseWheelMode MouseWheelMode { get; set; } = MouseWheelMode.PanAndZoom;
+
+        /// <summary>
+        /// Is right to left layout.
+        /// </summary>
         public bool IsRightToLeft
         {
             get => Panel.FlowDirection == FlowDirection.RightToLeft;
             set => Panel.FlowDirection = value ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
         }
-        public bool IsDocumentLoaded => Document != null && ActualWidth > 0 && ActualHeight > 0;
-        public int PageCount => Document?.PageCount ?? 0;
+
         /// <summary>
-        /// Gets or sets the current zoom level.
+        /// Document loaded.
+        /// </summary>
+        public bool IsDocumentLoaded => Document != null && ActualWidth > 0 && ActualHeight > 0;
+
+        /// <summary>
+        /// Current zoom level.
         /// </summary>
         [Browsable(false)]
         [DefaultValue(1.0)]
-        public double Zoom { get; set; }
-        [DefaultValue(DefaultZoomMin)] public double ZoomMin { get; set; }
-        [DefaultValue(DefaultZoomMax)] public double ZoomMax { get; set; }
-        [DefaultValue(DefaultZoomFactor)] public double ZoomFactor { get; set; }
+        public double Zoom { get; set; } = 1.0;
 
+        /// <summary>
+        /// Maximum zoom level.
+        /// </summary>
+        [DefaultValue(DefaultZoomMin)] public double ZoomMin { get; set; } = DefaultZoomMin;
+
+        /// <summary>
+        /// Minimum zoom level.
+        /// </summary>
+        [DefaultValue(DefaultZoomMax)] public double ZoomMax { get; set; } = DefaultZoomMax;
+
+        /// <summary>
+        /// Zoom step.
+        /// </summary>
+        [DefaultValue(DefaultZoomFactor)] public double ZoomFactor { get; set; } = DefaultZoomFactor;
+
+        /// <summary>
+        /// Bookmarks.
+        /// </summary>
         public PdfBookmarkCollection Bookmarks => Document?.Bookmarks;
-        public IList<SizeF> PageSizes => Document?.PageSizes;
 
+        /// <summary>
+        /// Scroll to selected page in continous mode
+        /// </summary>
+        /// <param name="page"></param>
         protected void ScrollToPage(int page)
         {
             if (Frames == null) return;
@@ -286,11 +333,13 @@ namespace PdfiumViewer
                 {
                     Zoom = containerHeight / currentPageSize.Height;
                 }
-                if (ZoomMode == PdfViewerZoomMode.FitWidth)
+                else if (ZoomMode == PdfViewerZoomMode.FitWidth)
                 {
                     Zoom = (containerWidth - ScrollWidth) / currentPageSize.Width;
                     if (PagesDisplayMode == PdfViewerPagesDisplayMode.BookMode)
+                    {
                         Zoom /= 2;
+                    }
                 }
 
                 return new Size((int)(currentPageSize.Width * Zoom), (int)(currentPageSize.Height * Zoom));
@@ -435,6 +484,7 @@ namespace PdfiumViewer
                 PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode &&
                 Frames != null)
             {
+                // Render frame for continous mode
                 var startOffset = e.VerticalOffset;
                 var height = e.ViewportHeight;
                 var pageSize = CalculatePageSize(0);
