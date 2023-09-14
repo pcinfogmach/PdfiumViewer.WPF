@@ -416,7 +416,6 @@ namespace PdfiumViewer.Demo
         #region Thumbnail view
 
         private string _thumbnailFilename = null;
-        private double _thumbnailViewVerticalOffset;
 
         public bool IsThumbnailOpen { get => _isThumbnailOpen; set => SetProperty(ref _isThumbnailOpen, value); }
         private bool _isThumbnailOpen;
@@ -427,25 +426,21 @@ namespace PdfiumViewer.Demo
             if (IsThumbnailOpen && !ThumbnailRenderer.IsDocumentLoaded && !string.IsNullOrEmpty(_thumbnailFilename))
             {
                 ThumbnailRenderer.OpenPdf(new FileStream(_thumbnailFilename, FileMode.Open, FileAccess.Read, FileShare.Read));
-
                 ThumbnailRenderer.PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
-                ThumbnailRenderer.SetZoom(0.16);
-                _thumbnailViewVerticalOffset = 0;
+                ThumbnailRenderer.SetZoomMode(PdfViewerZoomMode.FitWidth);
+                ThumbnailRenderer.IsZoomAllowed = false;
             }
         }
    
         private void ThumbnailRenderer_MouseClick(object sender, EventArgs e)
         {
-            var i = Mouse.GetPosition(Application.Current.MainWindow);
-            int index = (int)(((int)_thumbnailViewVerticalOffset + i.Y - 50) / (ThumbnailRenderer.CurrentPageSize.Height + 10));
-            Renderer.GotoPage(index);
-        }
-
-        private void ThumbnailRenderer_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
-        {
-            _thumbnailViewVerticalOffset = +e.VerticalOffset;
-            if (_thumbnailViewVerticalOffset < 0)
-                _thumbnailViewVerticalOffset = 0;
+            var mousePos = Mouse.GetPosition(ThumbnailRenderer);
+            mousePos.Y = mousePos.Y + ThumbnailRenderer.VerticalOffset - ThumbnailRenderer.Padding.Top;
+            int page = ThumbnailRenderer.GetPageNumberFromPosition(mousePos);
+            if (page >= 0)
+            {
+                Renderer.GotoPage(page);
+            }
         }
 
         #endregion

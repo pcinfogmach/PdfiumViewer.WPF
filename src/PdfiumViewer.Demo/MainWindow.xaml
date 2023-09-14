@@ -221,9 +221,8 @@
         </ToolBar>
 
         <pdfiumViewer:PdfRenderer Grid.Row="1" Grid.Column="1" Name="Renderer" Padding="10"/>
-        <pdfiumViewer:PdfRenderer Grid.Row="1" Grid.Column="0" Name="ThumbnailRenderer" Padding="10" 
+        <pdfiumViewer:PdfRenderer Grid.Row="1" Grid.Column="0" Name="ThumbnailRenderer" Padding="0 10 0 10" 
                                   MouseClick="ThumbnailRenderer_MouseClick" 
-                                  ScrollChanged="ThumbnailRenderer_ScrollChanged"
                                   Width="150" 
                                   Visibility="{Binding IsThumbnailOpen, Converter={StaticResource BoolToVisibilityConverter}}" />
 

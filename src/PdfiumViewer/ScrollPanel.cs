@@ -66,9 +66,6 @@ namespace PdfiumViewer
 
         public event EventHandler<int> PageChanged;
         public event EventHandler MouseClick;
-        public const double DefaultZoomMin = 0.1;
-        public const double DefaultZoomMax = 5;
-        public const double DefaultZoomFactor = 1.2;
         protected bool IsDisposed;
         protected const int ScrollChangeLine = 16;
         protected Process CurrentProcess { get; } = Process.GetCurrentProcess();
@@ -123,11 +120,6 @@ namespace PdfiumViewer
         private int _dpi;
 
         /// <summary>
-        /// Zoom mode (FitHeight, FitWidth or None)
-        /// </summary>
-        public PdfViewerZoomMode ZoomMode { get; protected set; } = PdfViewerZoomMode.FitHeight;
-
-        /// <summary>
         /// Pdf rendering flags
         /// </summary>
         public PdfRenderFlags Flags { get; set; } = PdfRenderFlags.CorrectFromDpi;
@@ -169,28 +161,6 @@ namespace PdfiumViewer
         /// Document loaded.
         /// </summary>
         public bool IsDocumentLoaded => Document != null && ActualWidth > 0 && ActualHeight > 0;
-
-        /// <summary>
-        /// Current zoom level.
-        /// </summary>
-        [Browsable(false)]
-        [DefaultValue(1.0)]
-        public double Zoom { get; set; } = 1.0;
-
-        /// <summary>
-        /// Maximum zoom level.
-        /// </summary>
-        [DefaultValue(DefaultZoomMin)] public double ZoomMin { get; set; } = DefaultZoomMin;
-
-        /// <summary>
-        /// Minimum zoom level.
-        /// </summary>
-        [DefaultValue(DefaultZoomMax)] public double ZoomMax { get; set; } = DefaultZoomMax;
-
-        /// <summary>
-        /// Zoom step.
-        /// </summary>
-        [DefaultValue(DefaultZoomFactor)] public double ZoomFactor { get; set; } = DefaultZoomFactor;
 
         /// <summary>
         /// Bookmarks.
@@ -348,19 +318,6 @@ namespace PdfiumViewer
             return new Size();
         }
 
-        protected void ReleaseFrames(int keepFrom, int keepTo)
-        {
-            for (var f = 0; f < Frames?.Length; f++)
-            {
-                var frame = Frames[f];
-                if ((f < keepFrom || f > keepTo) && frame.Source != null)
-                {
-                    frame.Source = null;
-                }
-            }
-            GC.Collect();
-        }
-
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
             base.OnRenderSizeChanged(sizeInfo);
@@ -482,30 +439,71 @@ namespace PdfiumViewer
             base.OnScrollChanged(e);
             if (IsDocumentLoaded &&
                 PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode &&
-                Frames != null)
+                Frames?.Length > 0)
             {
-                // Render frame for continous mode
-                var startOffset = e.VerticalOffset;
-                var height = e.ViewportHeight;
-                var pageSize = CalculatePageSize(0);
+                // Render frames for continous mode
+                double startOffset = e.VerticalOffset;
+                double endOffset = startOffset + e.ViewportHeight;
 
-                var startFrameIndex = (int)(startOffset / (pageSize.Height + FrameSpace.Top + FrameSpace.Bottom));
-                var endFrameIndex = (int)((startOffset + height) / (pageSize.Height + FrameSpace.Top + FrameSpace.Bottom));
-
-                PageNo = Math.Min(Math.Max(startFrameIndex, 0), PageCount - 1);
-                var endPageIndex = Math.Min(Math.Max(endFrameIndex, 0), PageCount - 1);
-
-                ReleaseFrames(PageNo, endPageIndex);
-
-                for (var page = PageNo; page <= endPageIndex; page++)
+                double position = 0;
+                for (int page = 0; page < Frames.Length; page++)
                 {
+                    var pageHeightWithFrame = Frames[page].Height + FrameSpace.Top + FrameSpace.Bottom;
+                    var pageStartPos = position;
+                    var pageEndPos = position + pageHeightWithFrame;
                     var frame = Frames[page];
-                    if (frame.Source == null) // && frame.IsUserVisible())
+
+                    if ((pageStartPos >= startOffset && pageStartPos < endOffset)      // Page top is inside the viewport range
+                        || (pageEndPos > startOffset && pageEndPos < endOffset)        // Page bottom is inside the viewport range
+                        || (pageStartPos < startOffset && pageEndPos >= endOffset))    // Page top is above the viewport and page bottom is below the viewport
                     {
-                        RenderPage(frame, page, (int)frame.Width, (int)frame.Height);
+                        // Page visible, render if not exist
+                        if (frame.Source == null) 
+                        {
+                            RenderPage(frame, page, (int)frame.Width, (int)frame.Height);
+                        }
                     }
+                    else
+                    {
+                        // Page not visible, release it
+                        if (frame.Source != null)
+                        {
+                            // Debug.WriteLine("Release Page[" + page + "]");
+                            frame.Source = null;
+                        }
+                    }
+                    position += pageHeightWithFrame;
+                }
+                GC.Collect();
+            }
+        }
+
+        public int GetPageNumberFromPosition(System.Windows.Point mousePos)
+        {
+            if (IsDocumentLoaded &&
+                PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode &&
+                Frames?.Length > 0)
+            {
+                // Determine frame
+                double position = 0;
+                for (int page = 0; page < Frames.Length; page++)
+                {
+                    var pageHeightWithFrame = Frames[page].Height + FrameSpace.Top + FrameSpace.Bottom;
+                    var pageWidthWithFrame = Frames[page].Width + FrameSpace.Left + FrameSpace.Right;
+                    var pageStartPos = position;
+                    var pageEndPos = position + pageHeightWithFrame;
+                    var hCenter = ViewportWidth / 2;
+                    var pageLeft = hCenter - pageWidthWithFrame / 2;
+                    var pageRight = hCenter + pageWidthWithFrame / 2;
+
+                    if (mousePos.X >= pageLeft && mousePos.X < pageRight && mousePos.Y >= pageStartPos && mousePos.Y < pageEndPos)
+                    {
+                        return page;
+                    }
+                    position += pageHeightWithFrame;
                 }
             }
+            return -1;
         }
 
         public void PerformScroll(ScrollAction action, Orientation scrollBar)
