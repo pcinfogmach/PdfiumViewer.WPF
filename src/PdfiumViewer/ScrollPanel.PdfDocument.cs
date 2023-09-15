@@ -148,16 +148,17 @@ namespace PdfiumViewer
             if (IsDocumentLoaded)
             {
                 PageNo = page;
-                CurrentPageSize = CalculatePageSize(page);
 
                 // ContinuousMode will be rendered in OnScrollChanged
                 if (PagesDisplayMode != PdfViewerPagesDisplayMode.ContinuousMode)
                 {
+                    CurrentPageSize = CalculatePageSize(page);
                     RenderPage(Frame1, page, CurrentPageSize.Width, CurrentPageSize.Height);
 
                     if (PagesDisplayMode == PdfViewerPagesDisplayMode.BookMode && page + 1 < Document.PageCount)
                     {
-                        RenderPage(Frame2, page + 1, CurrentPageSize.Width, CurrentPageSize.Height);
+                        var nextPageSize = CalculatePageSize(page + 1);
+                        RenderPage(Frame2, page + 1, nextPageSize.Width, nextPageSize.Height);
                     }
                 }
                 ScrollToPage(PageNo);
