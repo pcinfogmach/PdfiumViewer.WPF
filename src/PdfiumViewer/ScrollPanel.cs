@@ -444,6 +444,7 @@ namespace PdfiumViewer
                 // Render frames for continous mode
                 double startOffset = e.VerticalOffset;
                 double endOffset = startOffset + e.ViewportHeight;
+                bool isPageNoSet = false;
 
                 double position = 0;
                 for (int page = 0; page < Frames.Length; page++)
@@ -461,6 +462,11 @@ namespace PdfiumViewer
                         if (frame.Source == null) 
                         {
                             RenderPage(frame, page, (int)frame.Width, (int)frame.Height);
+                        }
+                        if (!isPageNoSet)
+                        {
+                            PageNo = page;
+                            isPageNoSet = true;
                         }
                     }
                     else
