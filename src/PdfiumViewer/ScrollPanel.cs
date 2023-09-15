@@ -529,9 +529,15 @@ namespace PdfiumViewer
                         break;
 
                     case ScrollAction.PageUp:
-                        if (ZoomMode == PdfViewerZoomMode.FitHeight)
+                        if (ZoomMode == PdfViewerZoomMode.FitHeight || ScrollableHeight == 0)
                         {
                             PreviousPage();
+                        }
+                        else if (PagesDisplayMode != PdfViewerPagesDisplayMode.ContinuousMode && VerticalOffset == 0)
+                        {
+                            // In single page / book mode we are on the top of the page, load the bottom of the previous page
+                            PreviousPage();
+                            ScrollToVerticalOffset(ScrollableHeight);
                         }
                         else
                         {
@@ -544,9 +550,15 @@ namespace PdfiumViewer
                         break;
 
                     case ScrollAction.PageDown:
-                        if (ZoomMode == PdfViewerZoomMode.FitHeight)
+                        if (ZoomMode == PdfViewerZoomMode.FitHeight || ScrollableHeight == 0)
                         {
                             NextPage();
+                        }
+                        else if (PagesDisplayMode != PdfViewerPagesDisplayMode.ContinuousMode && VerticalOffset == ScrollableHeight)
+                        {
+                            // In single page / book mode we are on the bottom of the page, load the top of the next page
+                            NextPage();
+                            ScrollToVerticalOffset(0);
                         }
                         else
                         {
