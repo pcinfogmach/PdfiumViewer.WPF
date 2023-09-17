@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
 using PdfiumViewer.Helpers;
 
@@ -256,6 +259,14 @@ namespace PdfiumViewer.Core
             }
         }
 
+        public static double FPDFText_GetFontSize(IntPtr page, int index)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFText_GetFontSize(page, index);
+            }
+        }
+
         public static int FPDFText_GetSchResultIndex(IntPtr handle)
         {
             lock (LockString)
@@ -288,11 +299,56 @@ namespace PdfiumViewer.Core
             }
         }
 
+        public static int FPDFText_GetCharIndexAtPos(IntPtr page, double x, double y, double xTolerance, double yTolerance)
+        {
+            lock (LockString)
+            {
+                var idx = Imports.FPDFText_GetCharIndexAtPos(page, x, y, xTolerance, yTolerance);
+                if (idx == -3)
+                    throw new PdfException((PdfError)Imports.FPDF_GetLastError());
+                return idx;
+            }
+        }
+
         public static int FPDFText_CountChars(IntPtr page)
         {
             lock (LockString)
             {
                 return Imports.FPDFText_CountChars(page);
+            }
+        }
+
+        public static List<PdfRectangle> FPDFText_GetRectangles(IntPtr page, int pageIndex, int startIndex, int characterCount)
+        {
+            lock (LockString)
+            {
+                // GetRect uses internal state set by CountRects, so we should call them within the same lock
+
+                var count = Imports.FPDFText_CountRects(page, startIndex, characterCount);
+                var rectangles = new List<PdfRectangle>(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (!Imports.FPDFText_GetRect(page, i, out var left, out var top, out var right, out var bottom))
+                        throw new PdfException((PdfError)Imports.FPDF_GetLastError());
+
+                    rectangles.Add(new PdfRectangle(pageIndex, new RectangleF(
+                        (float)left,
+                        (float)top,
+                        (float)(right - left),
+                        (float)(bottom - top)
+                    )));
+                }
+
+                return rectangles;
+            }
+        }
+
+        public static char FPDFText_GetUnicode(IntPtr page, int index)
+        {
+            lock (LockString)
+            {
+                return Imports.FPDFText_GetUnicode(page, index);
             }
         }
 
@@ -328,11 +384,11 @@ namespace PdfiumViewer.Core
             }
         }
 
-        public static uint FPDFDest_GetPageIndex(IntPtr document, IntPtr dest)
+        public static uint FPDFDest_GetDestPageIndex(IntPtr document, IntPtr dest)
         {
             lock (LockString)
             {
-                return Imports.FPDFDest_GetPageIndex(document, dest);
+                return Imports.FPDFDest_GetDestPageIndex(document, dest);
             }
         }
 
@@ -455,6 +511,14 @@ namespace PdfiumViewer.Core
 
         #region Save / Edit Methods
 
+        public static PdfRotation FPDFPage_GetRotation(IntPtr page)
+        {
+            lock (LockString)
+            {
+                return (PdfRotation)Imports.FPDFPage_GetRotation(page);
+            }
+        }
+
         public static void FPDFPage_SetRotation(IntPtr page, PdfRotation rotation)
         {
             lock (LockString)
@@ -481,7 +545,7 @@ namespace PdfiumViewer.Core
 
         public static bool FPDF_SaveAsCopy(IntPtr doc, Stream output, FPDF_SAVE_FLAGS flags)
         {
-            var id = StreamManager.Register(output);
+            int id = StreamManager.Register(output);
 
             try
             {
@@ -505,7 +569,7 @@ namespace PdfiumViewer.Core
 
         public static bool FPDF_SaveWithVersion(IntPtr doc, Stream output, FPDF_SAVE_FLAGS flags, int fileVersion)
         {
-            var id = StreamManager.Register(output);
+            int id = StreamManager.Register(output);
 
             try
             {
@@ -552,10 +616,10 @@ namespace PdfiumViewer.Core
             var stream = StreamManager.Get((int)param);
             if (stream == null)
                 return 0;
-            var managedBuffer = new byte[size];
+            byte[] managedBuffer = new byte[size];
 
             stream.Position = position;
-            var read = stream.Read(managedBuffer, 0, (int)size);
+            int read = stream.Read(managedBuffer, 0, (int)size);
             if (read != size)
                 return 0;
 
@@ -572,7 +636,7 @@ namespace PdfiumViewer.Core
             if (stream == null)
                 return 0;
 
-            var buffer = new byte[size];
+            byte[] buffer = new byte[size];
             Marshal.Copy(data, buffer, 0, (int)size);
 
             try
@@ -683,6 +747,9 @@ namespace PdfiumViewer.Core
             public static extern IntPtr FPDFText_FindStart(IntPtr page, byte[] findWhat, FPDF_SEARCH_FLAGS flags, int start_index);
 
             [DllImport("pdfium.dll")]
+            public static extern double FPDFText_GetFontSize(IntPtr page, int index);
+
+            [DllImport("pdfium.dll")]
             public static extern int FPDFText_GetSchResultIndex(IntPtr handle);
 
             [DllImport("pdfium.dll")]
@@ -695,7 +762,19 @@ namespace PdfiumViewer.Core
             public static extern void FPDFText_GetCharBox(IntPtr page, int index, out double left, out double right, out double bottom, out double top);
 
             [DllImport("pdfium.dll")]
+            public static extern int FPDFText_GetCharIndexAtPos(IntPtr page, double x, double y, double xTolerance, double yTolerance);
+
+            [DllImport("pdfium.dll")]
             public static extern int FPDFText_CountChars(IntPtr page);
+
+            [DllImport("pdfium.dll")]
+            public static extern int FPDFText_CountRects(IntPtr page, int startIndex, int count);
+
+            [DllImport("pdfium.dll")]
+            public static extern bool FPDFText_GetRect(IntPtr page, int index, out double left, out double top, out double right, out double bottom);
+
+            [DllImport("pdfium.dll", CharSet = CharSet.Unicode)]
+            public static extern char FPDFText_GetUnicode(IntPtr page, int index);
 
             [DllImport("pdfium.dll")]
             public static extern bool FPDFText_FindNext(IntPtr handle);
@@ -710,7 +789,7 @@ namespace PdfiumViewer.Core
             public static extern IntPtr FPDFLink_GetDest(IntPtr document, IntPtr link);
 
             [DllImport("pdfium.dll")]
-            public static extern uint FPDFDest_GetPageIndex(IntPtr document, IntPtr dest);
+            public static extern uint FPDFDest_GetDestPageIndex(IntPtr document, IntPtr dest);
 
             [DllImport("pdfium.dll")]
             public static extern bool FPDFLink_GetAnnotRect(IntPtr linkAnnot, FS_RECTF rect);

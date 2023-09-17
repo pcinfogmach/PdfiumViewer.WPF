@@ -55,6 +55,7 @@
     <Compile Include="Core\NativeMethods.cs" />
     <Compile Include="Core\NativeMethods.Pdfium.cs" />
     <Compile Include="Core\PdfBookmarkCollection.cs" />
+    <Compile Include="Core\PdfCharacterInformation.cs" />
     <Compile Include="Core\PdfDocument.cs" />
     <Compile Include="Core\PdfException.cs" />
     <Compile Include="Core\PdfFile.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Core\PdfSearchManager.cs" />
     <Compile Include="Drawing\PdfImage.cs" />
     <Compile Include="Drawing\PdfImageAdorner.cs" />
+    <Compile Include="Drawing\PdfPoint.cs" />
     <Compile Include="Drawing\PdfRectangle.cs" />
     <Compile Include="Drawing\PdfTextSpan.cs" />
     <Compile Include="Enums\MouseWheelMode.cs" />

@@ -52,7 +52,7 @@ namespace PdfiumViewer.Core
         {
             // First try the custom resolving mechanism.
 
-            var fileName = PdfiumResolver.GetPdfiumFileName();
+            string fileName = PdfiumResolver.GetPdfiumFileName();
             if (fileName != null && File.Exists(fileName) && LoadLibrary(fileName) != IntPtr.Zero)
                 return;
 

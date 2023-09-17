@@ -12,7 +12,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
@@ -23,7 +22,7 @@ using Size = System.Drawing.Size;
 namespace PdfiumViewer
 {
     // ScrollPanel.Properties
-    public partial class ScrollPanel : ScrollViewer, IPdfDocument, INotifyPropertyChanged
+    public partial class ScrollPanel : ScrollViewer, INotifyPropertyChanged
     {
         #region INotifyPropertyChanged
 

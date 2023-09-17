@@ -19,9 +19,7 @@ namespace PdfiumViewer
         {
             IsTabStop = true;
             Markers = new PdfMarkerCollection();
-            //Markers.CollectionChanged += Markers_CollectionChanged;
         }
-
 
         /// <summary>
         /// Gets a collection with all markers.
