@@ -151,9 +151,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\menu_rounded.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\print.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -16,13 +16,10 @@
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <ToolBar Grid.Row="0" Background="WhiteSmoke" Grid.ColumnSpan="2">
-            <Button ToolTip="open thumbnail" Click="OpenThumbnail">
-                <Image Source="Resources/menu_rounded.png" />
-            </Button>
             <Button ToolTip="Open Pdf" Click="OpenPdf">
                 <Image Source="Resources/open_pdf.png" />
             </Button>
@@ -32,45 +29,9 @@
             <Button ToolTip="Render all pages" Click="RenderToMemory">
                 <Image Source="Resources/render_all_pages.png" />
             </Button>
-            <Button Name="BtnShowBookmarks" ToolTip="Show Bookmarks" Click="OnDisplayBookmarks">
+            <Button Name="BtnShowSidepanel" ToolTip="Show bookmarks" Click="OnDisplaySidepanel">
                 <Image Source="Resources/show_bookmarks.png" />
             </Button>
-            <Popup IsOpen="{Binding ShowBookmarks}" 
-                   Placement="Bottom"
-                   PlacementRectangle="0,20,0,20"
-                   ScrollViewer.VerticalScrollBarVisibility="Auto"
-                   PlacementTarget = "{Binding ElementName=BtnShowBookmarks}"
-                   PopupAnimation="Slide">
-
-                <Border Background="WhiteSmoke" Height="Auto" MaxHeight="600"
-                        HorizontalAlignment="Center" 
-                        BorderBrush="AntiqueWhite" 
-                        BorderThickness="2">
-                    <TreeView x:Name="TocTree" 
-                                      MaxHeight="500" 
-                                      Foreground="{DynamicResource Brushes.ThemeForeground}"
-                                      FlowDirection="{Binding IsRtl, Mode=OneWay}"
-                                      ItemsSource="{Binding Bookmarks, Mode=OneWay}"
-                                      HorizontalContentAlignment="Stretch"
-                                      HorizontalAlignment="Stretch">
-                                <TreeView.ItemTemplate>
-                                    <HierarchicalDataTemplate ItemsSource="{Binding Children, Mode=OneWay}" DataType="{x:Type core:PdfBookmarkCollection}">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding Title, Mode=OneWay}" />
-                                            <TextBlock Grid.Column="1" Text="{Binding PageIndex, Mode=OneWay}" HorizontalAlignment="Right" Margin="10,0"/>
-                                        </Grid>
-                                    </HierarchicalDataTemplate>
-                                </TreeView.ItemTemplate>
-                                <b:Interaction.Behaviors>
-                                    <converters:BindSelectedItemBehavior SelectedItem="{Binding SelectedBookIndex, Mode=OneWayToSource}" />
-                                </b:Interaction.Behaviors>
-                            </TreeView>
-                </Border>
-            </Popup>
             <Button x:Name="BtnSearch" ToolTip="Search term" Click="OpenCloseSearch">
                 <Image Source="Resources/find.png" />
             </Button>
@@ -220,12 +181,48 @@
                 <Image Source="Resources/close_pdf.png" />
             </Button>
         </ToolBar>
+       
+        <TabControl Grid.Row="1" Grid.Column="0"
+                    x:Name="SidePanel"
+                    Visibility="{Binding IsSidepanelOpen, Converter={StaticResource BoolToVisibilityConverter}}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch">
+            <TabItem x:Name="BookmarksTab" Header="Bookmarks" HorizontalAlignment="Stretch">
+                <TreeView x:Name="BookmarkTree" 
+                          Foreground="{DynamicResource Brushes.ThemeForeground}"
+                          FlowDirection="{Binding IsRtl, Mode=OneWay}"
+                          ItemsSource="{Binding Bookmarks, Mode=OneWay}"
+                          HorizontalContentAlignment="Stretch"
+                          HorizontalAlignment="Stretch"
+                          SelectedItemChanged="BookmarkTree_SelectedItemChanged"
+                          Width="250"
+                          >
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children, Mode=OneWay}" DataType="{x:Type core:PdfBookmarkCollection}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding Title, Mode=OneWay}" />
+                                <TextBlock Grid.Column="1" Text="{Binding PageIndex, Mode=OneWay}" HorizontalAlignment="Right" Margin="10,0"/>
+                            </Grid>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </TabItem>
+            <TabItem x:Name="ThumbnailsTab" Header="Thumbnails" 
+                     HorizontalAlignment="Stretch">
+                <pdfiumViewer:PdfRenderer Name="ThumbnailRenderer" Padding="0 10 0 10" 
+                                          MouseClick="ThumbnailRenderer_MouseClick" 
+                                          HorizontalAlignment="Stretch"
+                                          HorizontalContentAlignment="Left"
+                                          Width="200"
+                                   />
+            </TabItem>
+        </TabControl>
 
         <pdfiumViewer:PdfRenderer Grid.Row="1" Grid.Column="1" Name="Renderer" Padding="10"/>
-        <pdfiumViewer:PdfRenderer Grid.Row="1" Grid.Column="0" Name="ThumbnailRenderer" Padding="0 10 0 10" 
-                                  MouseClick="ThumbnailRenderer_MouseClick" 
-                                  Width="150" 
-                                  Visibility="{Binding IsThumbnailOpen, Converter={StaticResource BoolToVisibilityConverter}}" />
 
         <StatusBar Grid.Row="2" Grid.ColumnSpan="2">
             <StatusBarItem Content="Page:" />

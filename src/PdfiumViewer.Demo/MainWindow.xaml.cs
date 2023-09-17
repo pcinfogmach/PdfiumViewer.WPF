@@ -1,8 +1,7 @@
 ﻿using Microsoft.Win32;
 using PdfiumViewer.Core;
-using PdfiumViewer.Demo.Annotations;
-using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
+
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -71,31 +70,15 @@ namespace PdfiumViewer.Demo
         private Process CurrentProcess { get; }
         private CancellationTokenSource Cts { get; }
         private System.Windows.Threading.DispatcherTimer MemoryChecker { get; }
-        private PdfSearchManager SearchManager { get; }
 
         public string InfoText { get => _infoText; protected set => SetProperty(ref _infoText, value); }
         private string _infoText;
 
-        public PdfBookmarkCollection Bookmarks { get; set; }
-        public bool ShowBookmarks { get; set; }
-        public PdfBookmark SelectedBookIndex { get; set; }
         public double ZoomPercent
         {
             get => Renderer.Zoom * 100;
             set => Renderer.SetZoom(value / 100);
         }
-
-        public string SearchTerm { get => _searchTerm; set => SetProperty(ref _searchTerm, value); }
-        private string _searchTerm;
-
-        public bool IsSearchOpen { get => _isSearchOpen; set => SetProperty(ref _isSearchOpen, value); }
-        private bool _isSearchOpen;
-
-        public int SearchMatchItemNo { get => _searchMatchItemNo; set => SetProperty(ref _searchMatchItemNo, value); }
-        private int _searchMatchItemNo;
-
-        public int SearchMatchesCount { get => _searchMatchesCount; set => SetProperty(ref _searchMatchesCount, value); }
-        private int _searchMatchesCount;
 
         public int Page
         {
@@ -108,13 +91,11 @@ namespace PdfiumViewer.Demo
             set => Renderer.IsRightToLeft = value == FlowDirection.RightToLeft ? true : false;
         }
 
-
         private void OnMemoryChecker(object sender, EventArgs e)
         {
             CurrentProcess.Refresh();
             InfoText = $"Memory: {CurrentProcess.PrivateMemorySize64 / 1024 / 1024} MB";
         }
-
 
         private async void RenderToMemory(object sender, RoutedEventArgs e)
         {
@@ -145,21 +126,16 @@ namespace PdfiumViewer.Demo
 
             if (dialog.ShowDialog() == true)
             {
-                SearchManager.Reset();
-                SearchMatchItemNo = 0;
-                SearchMatchesCount = 0;
-                SearchTerm = null;
-                IsSearchOpen = false;
+                ResetSearch();
+                ResetBookmarks();
+                ResetThumbnails();
 
                 Renderer.OpenPdf(new FileStream(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
-                // Open Thumbnails
-                ThumbnailRenderer.UnLoad();
                 _thumbnailFilename = dialog.FileName;
-                if (IsThumbnailOpen)
-                {
-                    IsThumbnailOpen = false;
-                    OpenThumbnail(this, null);
+                if (IsSidepanelOpen) {
+                    ShowBookmarks();
+                    ShowThumbnails();
                 }
             }
         }
@@ -242,13 +218,6 @@ namespace PdfiumViewer.Demo
             txtViewer.ShowDialog();
         }
 
-        private void OnDisplayBookmarks(object sender, RoutedEventArgs e)
-        {
-            Bookmarks = Renderer.Bookmarks;
-            if (Bookmarks?.Count > 0)
-                ShowBookmarks = !ShowBookmarks;
-        }
-
         private void OnContinuousModeClick(object sender, RoutedEventArgs e)
         {
             Renderer.PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
@@ -273,19 +242,6 @@ namespace PdfiumViewer.Demo
             else
             {
                 Renderer.Flags |= PdfRenderFlags.Transparent;
-            }
-        }
-
-        private void OpenCloseSearch(object sender, RoutedEventArgs e)
-        {
-            IsSearchOpen = !IsSearchOpen;
-        }
-
-        private void OnSearchTermKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                Search();
             }
         }
 
@@ -336,52 +292,6 @@ namespace PdfiumViewer.Demo
             }
         }
 
-        private void Search()
-        {
-            SearchMatchItemNo = 0;
-            SearchManager.MatchCase = MatchCaseCheckBox.IsChecked.GetValueOrDefault();
-            SearchManager.MatchWholeWord = WholeWordOnlyCheckBox.IsChecked.GetValueOrDefault();
-            SearchManager.HighlightAllMatches = HighlightAllMatchesCheckBox.IsChecked.GetValueOrDefault();
-            SearchMatchesTextBlock.Visibility = Visibility.Visible;
-
-            if (!SearchManager.Search(SearchTerm))
-            {
-                MessageBox.Show(this, "No matches found.");
-            }
-            else
-            {
-                SearchMatchesCount = SearchManager.MatchesCount;
-                SearchMatchItemNo = 1;
-            }
-
-            if (!SearchManager.FindNext(true))
-                MessageBox.Show(this, "Find reached the starting point of the search.");
-        }
-
-        private void DisplayTextSpan(PdfTextSpan span)
-        {
-            Page = span.Page + 1;
-            Renderer.ScrollToVerticalOffset(span.Offset);
-        }
-
-        private void OnNextFoundClick(object sender, RoutedEventArgs e)
-        {
-            if (SearchMatchesCount > SearchMatchItemNo)
-            {
-                SearchMatchItemNo++;
-                SearchManager.FindNext(true);
-            }
-        }
-
-        private void OnPrevFoundClick(object sender, RoutedEventArgs e)
-        {
-            if (SearchMatchItemNo > 1)
-            {
-                SearchMatchItemNo--;
-                SearchManager.FindNext(false);
-            }
-        }
-
         private void ToRtlClick(object sender, RoutedEventArgs e)
         {
             Renderer.IsRightToLeft = true;
@@ -414,34 +324,155 @@ namespace PdfiumViewer.Demo
             Renderer.EnableKinetic = toggle.IsChecked == true;
         }
 
-        /// <summary>
-        /// Call when SelectedBookIndex changed.
-        /// </summary>
-        private void OnSelectedBookIndexChanged()
+        #region Search
+
+        private PdfSearchManager SearchManager { get; }
+
+        public string SearchTerm { get => _searchTerm; set => SetProperty(ref _searchTerm, value); }
+        private string _searchTerm;
+
+        public bool IsSearchOpen { get => _isSearchOpen; set => SetProperty(ref _isSearchOpen, value); }
+        private bool _isSearchOpen;
+
+        public int SearchMatchItemNo { get => _searchMatchItemNo; set => SetProperty(ref _searchMatchItemNo, value); }
+        private int _searchMatchItemNo;
+
+        public int SearchMatchesCount { get => _searchMatchesCount; set => SetProperty(ref _searchMatchesCount, value); }
+        private int _searchMatchesCount;
+
+
+        private void OpenCloseSearch(object sender, RoutedEventArgs e)
         {
-            if (SelectedBookIndex != null)
-                Renderer.GotoPage(SelectedBookIndex.PageIndex);
+            IsSearchOpen = !IsSearchOpen;
         }
+
+        private void OnSearchTermKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Search();
+            }
+        }
+
+        private void Search()
+        {
+            SearchMatchItemNo = 0;
+            SearchManager.MatchCase = MatchCaseCheckBox.IsChecked.GetValueOrDefault();
+            SearchManager.MatchWholeWord = WholeWordOnlyCheckBox.IsChecked.GetValueOrDefault();
+            SearchManager.HighlightAllMatches = HighlightAllMatchesCheckBox.IsChecked.GetValueOrDefault();
+            SearchMatchesTextBlock.Visibility = Visibility.Visible;
+
+            if (!SearchManager.Search(SearchTerm))
+            {
+                MessageBox.Show(this, "No matches found.");
+            }
+            else
+            {
+                SearchMatchesCount = SearchManager.MatchesCount;
+                SearchMatchItemNo = 1;
+            }
+
+            if (!SearchManager.FindNext(true))
+                MessageBox.Show(this, "Find reached the starting point of the search.");
+        }
+
+        private void OnNextFoundClick(object sender, RoutedEventArgs e)
+        {
+            if (SearchMatchesCount > SearchMatchItemNo)
+            {
+                SearchMatchItemNo++;
+                SearchManager.FindNext(true);
+            }
+        }
+
+        private void OnPrevFoundClick(object sender, RoutedEventArgs e)
+        {
+            if (SearchMatchItemNo > 1)
+            {
+                SearchMatchItemNo--;
+                SearchManager.FindNext(false);
+            }
+        }
+
+        private void SearchPopup_Opened(object sender, EventArgs e)
+        {
+            SearchTermTextBox.Focus();
+        }
+
+        private void ResetSearch()
+        {
+            SearchManager.Reset();
+            SearchMatchItemNo = 0;
+            SearchMatchesCount = 0;
+            SearchTerm = null;
+            IsSearchOpen = false;
+        }
+
+        #endregion
+
+        #region Side panel
+
+        public bool IsSidepanelOpen { get => _isSidepanelOpen; set => SetProperty(ref _isSidepanelOpen, value); }
+        private bool _isSidepanelOpen;
+
+        private void OnDisplaySidepanel(object sender, RoutedEventArgs e)
+        {
+            IsSidepanelOpen = !IsSidepanelOpen;
+
+            if (IsSidepanelOpen)
+            {
+                ShowBookmarks();
+                ShowThumbnails();
+            }
+            else
+            {
+                ResetBookmarks();
+                ResetThumbnails();
+            }
+        }
+
+        #endregion
+
+        #region Bookmarks
+
+        public PdfBookmarkCollection Bookmarks { get => _bookmarks; set => SetProperty(ref _bookmarks, value); }
+        private PdfBookmarkCollection _bookmarks;
+
+        private void BookmarkTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            PdfBookmark selectedBookmark = BookmarkTree.SelectedItem as PdfBookmark;
+            if (selectedBookmark != null)
+            {
+                Renderer.GotoPage(selectedBookmark.PageIndex);
+            }
+        }
+
+        private void ResetBookmarks()
+        {
+            Bookmarks = null;
+            BookmarksTab.Visibility = Visibility.Visible;
+            BookmarksTab.IsSelected = true;
+        }
+
+        private void ShowBookmarks()
+        {
+            Bookmarks = Renderer.Bookmarks;
+            if (Bookmarks?.Count == 0)
+            {
+                BookmarksTab.Visibility = Visibility.Collapsed;
+                ThumbnailsTab.IsSelected = true;
+            }
+        }
+
+        #endregion
 
         #region Thumbnail view
 
         private string _thumbnailFilename = null;
 
-        public bool IsThumbnailOpen { get => _isThumbnailOpen; set => SetProperty(ref _isThumbnailOpen, value); }
-        private bool _isThumbnailOpen;
-
-        private void OpenThumbnail(object sender, RoutedEventArgs e)
-        {
-            IsThumbnailOpen = !IsThumbnailOpen;
-            if (IsThumbnailOpen && !ThumbnailRenderer.IsDocumentLoaded && !string.IsNullOrEmpty(_thumbnailFilename))
-            {
-                ThumbnailRenderer.OpenPdf(new FileStream(_thumbnailFilename, FileMode.Open, FileAccess.Read, FileShare.Read));
-                ThumbnailRenderer.PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
-                ThumbnailRenderer.SetZoomMode(PdfViewerZoomMode.FitWidth);
-                ThumbnailRenderer.IsZoomAllowed = false;
-            }
-        }
-   
+        public bool IsThumbnailLoaded { get => _isThumbnailLoaded; set => SetProperty(ref _isThumbnailLoaded, value); }
+        private bool _isThumbnailLoaded;
+  
         private void ThumbnailRenderer_MouseClick(object sender, EventArgs e)
         {
             var mousePos = Mouse.GetPosition(ThumbnailRenderer);
@@ -450,6 +481,24 @@ namespace PdfiumViewer.Demo
             if (page >= 0)
             {
                 Renderer.GotoPage(page);
+            }
+        }
+
+        private void ResetThumbnails()
+        {
+            ThumbnailRenderer.UnLoad();
+            IsThumbnailLoaded = false;
+        }
+
+        private void ShowThumbnails()
+        {
+            if (!IsThumbnailLoaded && !ThumbnailRenderer.IsDocumentLoaded && !string.IsNullOrEmpty(_thumbnailFilename))
+            {
+                ThumbnailRenderer.OpenPdf(new FileStream(_thumbnailFilename, FileMode.Open, FileAccess.Read, FileShare.Read));
+                ThumbnailRenderer.PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
+                ThumbnailRenderer.SetZoomMode(PdfViewerZoomMode.FitWidth);
+                ThumbnailRenderer.IsZoomAllowed = false;
+                IsThumbnailLoaded = true;
             }
         }
 
@@ -490,10 +539,5 @@ namespace PdfiumViewer.Demo
         }
 
         #endregion
-
-        private void SearchPopup_Opened(object sender, EventArgs e)
-        {
-            SearchTermTextBox.Focus();
-        }
     }
 }

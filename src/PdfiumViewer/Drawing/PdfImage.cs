@@ -16,7 +16,7 @@ namespace PdfiumViewer.Drawing
             {
                 AdornerLayer layer = AdornerLayer.GetAdornerLayer(Renderer);
                 _adorner = new PdfImageAdorner(this);
-                layer.Add(_adorner);
+                layer?.Add(_adorner);
             }
         }
 
@@ -26,7 +26,7 @@ namespace PdfiumViewer.Drawing
             if (_adorner != null)
             {
                 AdornerLayer layer = AdornerLayer.GetAdornerLayer(Renderer);
-                layer.Remove(_adorner);
+                layer?.Remove(_adorner);
                 _adorner = null;
             }
         }
