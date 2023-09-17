@@ -158,6 +158,11 @@ namespace PdfiumViewer
                 verticalOffset += rectangle.Y - clientArea.Height / 2;
                 ScrollToVerticalOffset(verticalOffset);
             }
+            else
+            {
+                // Workaround to highlight current match in FitHeight mode
+                ScrollToVerticalOffset(VerticalOffset);
+            }
         }
 
         /// <summary>
