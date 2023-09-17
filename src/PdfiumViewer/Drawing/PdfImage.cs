@@ -1,5 +1,5 @@
 ﻿using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Documents;
 
 namespace PdfiumViewer.Drawing
 {
@@ -7,14 +7,27 @@ namespace PdfiumViewer.Drawing
     {
         public PdfRenderer Renderer { get; set; }
         public int PageNo {get; set; }
+        private Adorner _adorner = null;
 
-        protected override void OnRender(DrawingContext drawingContext)
+        public void AddAdorner()
         {
-            base.OnRender(drawingContext);
-            if (Source != null)
+            // Create an adorner to this Frame
+            if (_adorner == null)
             {
-                Renderer.EnsureMarkers();
-                Renderer.DrawMarkers(drawingContext, PageNo);
+                AdornerLayer layer = AdornerLayer.GetAdornerLayer(Renderer);
+                _adorner = new PdfImageAdorner(this);
+                layer.Add(_adorner);
+            }
+        }
+
+        public void RemoveAdorner()
+        {
+            // Remove adorner
+            if (_adorner != null)
+            {
+                AdornerLayer layer = AdornerLayer.GetAdornerLayer(Renderer);
+                layer.Remove(_adorner);
+                _adorner = null;
             }
         }
     }

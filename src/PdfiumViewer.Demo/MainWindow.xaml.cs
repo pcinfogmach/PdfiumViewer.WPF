@@ -76,7 +76,6 @@ namespace PdfiumViewer.Demo
         public string InfoText { get => _infoText; protected set => SetProperty(ref _infoText, value); }
         private string _infoText;
 
-        public string SearchTerm { get; set; }
         public PdfBookmarkCollection Bookmarks { get; set; }
         public bool ShowBookmarks { get; set; }
         public PdfBookmark SelectedBookIndex { get; set; }
@@ -85,6 +84,9 @@ namespace PdfiumViewer.Demo
             get => Renderer.Zoom * 100;
             set => Renderer.SetZoom(value / 100);
         }
+
+        public string SearchTerm { get => _searchTerm; set => SetProperty(ref _searchTerm, value); }
+        private string _searchTerm;
 
         public bool IsSearchOpen { get => _isSearchOpen; set => SetProperty(ref _isSearchOpen, value); }
         private bool _isSearchOpen;
@@ -144,6 +146,11 @@ namespace PdfiumViewer.Demo
             if (dialog.ShowDialog() == true)
             {
                 SearchManager.Reset();
+                SearchMatchItemNo = 0;
+                SearchMatchesCount = 0;
+                SearchTerm = null;
+                IsSearchOpen = false;
+
                 Renderer.OpenPdf(new FileStream(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 // Open Thumbnails

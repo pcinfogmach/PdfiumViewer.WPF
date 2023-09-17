@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
+using System.Windows.Documents;
 using PdfiumViewer.Core;
 using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
@@ -143,23 +144,30 @@ namespace PdfiumViewer
             return Document.RectangleFromPdf(page, rect);
         }
 
-        public void GotoPage(int page, bool forceRender = false)
+        public void GotoPage(int page, bool forceRender=false)
         {
             if (IsDocumentLoaded)
             {
                 PageNo = page;
+                PageNoLast = page;
 
                 // ContinuousMode will be rendered in OnScrollChanged
                 if (PagesDisplayMode != PdfViewerPagesDisplayMode.ContinuousMode || forceRender)
                 {
                     CurrentPageSize = CalculatePageSize(page);
                     RenderPage(Frame1, page, CurrentPageSize.Width, CurrentPageSize.Height);
+                    Frame1.AddAdorner();
 
                     if (PagesDisplayMode == PdfViewerPagesDisplayMode.BookMode && page + 1 < Document.PageCount)
                     {
                         var nextPageSize = CalculatePageSize(page + 1);
                         RenderPage(Frame2, page + 1, nextPageSize.Width, nextPageSize.Height);
+                        Frame2.AddAdorner();
+                        PageNoLast = page + 1;
                     }
+
+                    AdornerLayer layer = AdornerLayer.GetAdornerLayer(this);
+                    layer?.Update();
                 }
                 ScrollToPage(PageNo);
             }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Media;
@@ -40,8 +39,6 @@ namespace PdfiumViewer.Core
 
             Rect? bounds = renderer.BoundsFromPdf(new PdfRectangle(Page, Bounds));
             if (bounds == null) return;
-
-            Debug.WriteLine("DrawMarker[" + Page + "]: " + Color + ", bounds=" + bounds);
 
             var brush = new SolidColorBrush(Color) { Opacity = .8 };
             graphics.DrawRectangle(brush, null, bounds.Value);

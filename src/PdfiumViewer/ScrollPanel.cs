@@ -12,6 +12,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
@@ -103,6 +104,12 @@ namespace PdfiumViewer
         private int _pageNo;
 
         /// <summary>
+        /// Number of the last visible page.
+        /// </summary>
+        public int PageNoLast { get => _pageNoLast; protected set => SetProperty(ref _pageNoLast, value); }
+        private int _pageNoLast;
+
+        /// <summary>
         /// Page sizes.
         /// </summary>
         public IList<SizeF> PageSizes => Document?.PageSizes;
@@ -186,9 +193,12 @@ namespace PdfiumViewer
         protected double GetPageVerticalOffset(int page)
         {
             double verticalOffset = 0.0;
-            for (int idx = 0; idx < page; idx++)
+            if (PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode)
             {
-                verticalOffset += Frames[idx].Height + FrameSpace.Top + FrameSpace.Bottom;
+                for (int idx = 0; idx < page; idx++)
+                {
+                    verticalOffset += Frames[idx].Height + FrameSpace.Top + FrameSpace.Bottom;
+                }
             }
             return verticalOffset;
         }
@@ -455,6 +465,7 @@ namespace PdfiumViewer
                 bool isPageNoSet = false;
 
                 double position = 0;
+                int pageNoLast = 0;
                 for (int page = 0; page < Frames.Length; page++)
                 {
                     var pageHeightWithFrame = Frames[page].Height + FrameSpace.Top + FrameSpace.Bottom;
@@ -470,6 +481,8 @@ namespace PdfiumViewer
                         if (frame.Source == null) 
                         {
                             RenderPage(frame, page, (int)frame.Width, (int)frame.Height);
+                            frame.AddAdorner();
+                            pageNoLast = page;
                         }
                         if (!isPageNoSet)
                         {
@@ -484,9 +497,11 @@ namespace PdfiumViewer
                         {
                             // Debug.WriteLine("Release Page[" + page + "]");
                             frame.Source = null;
+                            frame.RemoveAdorner();
                         }
                     }
                     position += pageHeightWithFrame;
+                    PageNoLast = pageNoLast;
                 }
                 GC.Collect();
             }

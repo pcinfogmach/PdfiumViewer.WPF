@@ -115,9 +115,9 @@
                         <Button ToolTip="Previous Page" Click="OnNextFoundClick" Background="Transparent" BorderThickness="0" Width="30">
                             <Image Source="Resources/next.png" />
                         </Button>
-                        <CheckBox Name="MatchCaseCheckBox" VerticalContentAlignment="Center" Margin="5">Match case</CheckBox>
-                        <CheckBox Name="WholeWordOnlyCheckBox" VerticalContentAlignment="Center" Margin="5">Match Whole words</CheckBox>
-                        <CheckBox Name="HighlightAllMatchesCheckBox" VerticalContentAlignment="Center" Margin="5">Highlight All Matches</CheckBox>
+                        <CheckBox Name="MatchCaseCheckBox" VerticalAlignment="Center" Margin="5">Match case</CheckBox>
+                        <CheckBox Name="WholeWordOnlyCheckBox" VerticalAlignment="Center" Margin="5">Match Whole words</CheckBox>
+                        <CheckBox Name="HighlightAllMatchesCheckBox" VerticalAlignment="Center" Margin="5">Highlight All Matches</CheckBox>
                         <TextBlock x:Name="SearchMatchesTextBlock" Background="LightCyan" Visibility="Collapsed" 
                                    VerticalAlignment="Center" Margin="5" Padding="10">
                             <Run Text="{Binding SearchMatchItemNo, Mode=OneWay}" />

@@ -104,9 +104,10 @@ namespace PdfiumViewer.Core
         {
             Renderer.Markers.Clear();
 
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text) || Renderer.Document == null)
             {
                 _bounds = null;
+                UpdateHighlights();
             }
             else
             {
@@ -177,7 +178,12 @@ namespace PdfiumViewer.Core
             var current = _bounds[_offset];
             if (current.Count > 0)
             {
-                Renderer.GotoPage(current[0].Page, forceRender: true);
+                int page = current[0].Page;
+                // Go to the page only if not visible
+                if (page < Renderer.PageNo || page > Renderer.PageNoLast)
+                {
+                    Renderer.GotoPage(current[0].Page);
+                }
                 Renderer.ScrollIntoView(current[0]);
             }
         }
@@ -212,7 +218,10 @@ namespace PdfiumViewer.Core
             Renderer.Markers.Clear();
 
             if (_bounds == null)
+            {
+                Renderer.RedrawMarkers();
                 return;
+            }
 
             if (_highlightAllMatches)
             {
@@ -226,8 +235,8 @@ namespace PdfiumViewer.Core
             {
                 AddMatch(_offset, true);
             }
-            Renderer.RedrawMarkers();
             ScrollCurrentIntoView();
+            Renderer.RedrawMarkers();
         }
 
         private void AddMatch(int index, bool current)

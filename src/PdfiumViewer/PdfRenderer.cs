@@ -9,6 +9,7 @@ using PdfiumViewer.Enums;
 using Size = System.Drawing.Size;
 using SizeF = System.Drawing.SizeF;
 using PointF = System.Drawing.PointF;
+using System.Windows.Documents;
 
 namespace PdfiumViewer
 {
@@ -34,7 +35,7 @@ namespace PdfiumViewer
             IsRightToLeft = isRightToLeft;
             Document = PdfDocument.Load(path);
             OnPagesDisplayModeChanged();
-            GotoPage(0);
+            GotoPage(0, true);
         }
 
         public void OpenPdf(string path, string password, bool isRightToLeft = false)
@@ -43,7 +44,7 @@ namespace PdfiumViewer
             IsRightToLeft = isRightToLeft;
             Document = PdfDocument.Load(path, password);
             OnPagesDisplayModeChanged();
-            GotoPage(0);
+            GotoPage(0, true);
         }
 
         public void OpenPdf(Stream stream, bool isRightToLeft = false, int pageNumber = 0)
@@ -52,7 +53,7 @@ namespace PdfiumViewer
             IsRightToLeft = isRightToLeft;
             Document = PdfDocument.Load(stream);
             OnPagesDisplayModeChanged();
-            GotoPage(pageNumber);
+            GotoPage(pageNumber, true);
         }
 
         public void OpenPdf(Stream stream, string password, bool isRightToLeft = false)
@@ -61,7 +62,7 @@ namespace PdfiumViewer
             IsRightToLeft = isRightToLeft;
             Document = PdfDocument.Load(stream, password);
             OnPagesDisplayModeChanged();
-            GotoPage(0);
+            GotoPage(0, true);
         }
 
         public void UnLoad()
@@ -149,7 +150,15 @@ namespace PdfiumViewer
             var clientArea = GetScrollClientArea();
             if (ScrollableWidth > 0)
             {
-                ScrollToHorizontalOffset(rectangle.X - clientArea.Width / 2);
+                double horizontalOffset = rectangle.X - clientArea.Width / 2;
+                if (PagesDisplayMode == PdfViewerPagesDisplayMode.BookMode)
+                {
+                    if ((!IsRightToLeft && page == PageNoLast) || (IsRightToLeft && page == PageNo))
+                    {
+                        horizontalOffset += Frame1.Width + FrameSpace.Left + FrameSpace.Right;
+                    }
+                }
+                ScrollToHorizontalOffset(horizontalOffset);
             }
 
             if (ScrollableHeight > 0 && ZoomMode != PdfViewerZoomMode.FitHeight)
@@ -157,11 +166,6 @@ namespace PdfiumViewer
                 double verticalOffset = GetPageVerticalOffset(page);
                 verticalOffset += rectangle.Y - clientArea.Height / 2;
                 ScrollToVerticalOffset(verticalOffset);
-            }
-            else
-            {
-                // Workaround to highlight current match in FitHeight mode
-                ScrollToVerticalOffset(VerticalOffset);
             }
         }
 
@@ -311,6 +315,8 @@ namespace PdfiumViewer
         public void RedrawMarkers()
         {
             _markersByPage = null;
+            AdornerLayer layer = AdornerLayer.GetAdornerLayer(this);
+            layer?.Update();
         }
 
         protected override void Dispose(bool disposing)
