@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Media;
@@ -37,14 +38,18 @@ namespace PdfiumViewer.Core
             if (graphics == null)
                 throw new ArgumentNullException(nameof(graphics));
 
-            Rect bounds = renderer.BoundsFromPdf(new PdfRectangle(Page, Bounds));
+            Rect? bounds = renderer.BoundsFromPdf(new PdfRectangle(Page, Bounds));
+            if (bounds == null) return;
+
+            Debug.WriteLine("DrawMarker[" + Page + "]: " + Color + ", bounds=" + bounds);
+
             var brush = new SolidColorBrush(Color) { Opacity = .8 };
-            var pen = new Pen(new SolidColorBrush(BorderColor) { Opacity = .8 }, BorderWidth);
-            graphics.DrawRectangle(brush, null, bounds);
+            graphics.DrawRectangle(brush, null, bounds.Value);
 
             if (BorderWidth > 0)
             {
-                graphics.DrawRectangle(null, pen, bounds);
+                var pen = new Pen(new SolidColorBrush(BorderColor) { Opacity = .8 }, BorderWidth);
+                graphics.DrawRectangle(null, pen, bounds.Value);
             }
         }
     }

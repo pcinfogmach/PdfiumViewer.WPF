@@ -81,7 +81,8 @@
                    Placement="Bottom"
                    PlacementRectangle="0,20,0,20"
                    PlacementTarget = "{Binding ElementName=BtnSearch}"
-                   PopupAnimation="Slide">
+                   PopupAnimation="Slide"
+                   Opened="SearchPopup_Opened">
 
                 <Border Background="WhiteSmoke" Height="50" 
                         HorizontalAlignment="Center" 

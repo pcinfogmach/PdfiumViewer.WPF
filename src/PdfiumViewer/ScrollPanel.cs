@@ -1,4 +1,5 @@
 ﻿using PdfiumViewer.Core;
+using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,6 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Image = System.Windows.Controls.Image;
 using Size = System.Drawing.Size;
 
 namespace PdfiumViewer
@@ -71,9 +71,9 @@ namespace PdfiumViewer
         protected Process CurrentProcess { get; } = Process.GetCurrentProcess();
         protected StackPanel Panel { get; set; }
         protected Thickness FrameSpace { get; set; } = new Thickness(5);
-        protected Image Frame1 => Frames?.FirstOrDefault();
-        protected Image Frame2 => Frames?.Length > 1 ? Frames[1] : null;
-        protected Image[] Frames { get; set; }
+        protected PdfImage Frame1 => Frames?.FirstOrDefault();
+        protected PdfImage Frame2 => Frames?.Length > 1 ? Frames[1] : null;
+        protected PdfImage[] Frames { get; set; }
         protected int ScrollWidth { get; set; } = 50;
         protected int MouseWheelDelta { get; set; }
         protected long MouseWheelUpdateTime { get; set; }
@@ -178,12 +178,19 @@ namespace PdfiumViewer
             if (PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode)
             {
                 // scroll to current page
-                double verticalOffset = 0.0;
-                for (int idx = 0; idx < page; idx++) {
-                    verticalOffset += Frames[idx].Height + FrameSpace.Top + FrameSpace.Bottom;
-                }
+                double verticalOffset = GetPageVerticalOffset(page);
                 ScrollToVerticalOffset(verticalOffset);
             }
+        }
+
+        protected double GetPageVerticalOffset(int page)
+        {
+            double verticalOffset = 0.0;
+            for (int idx = 0; idx < page; idx++)
+            {
+                verticalOffset += Frames[idx].Height + FrameSpace.Top + FrameSpace.Bottom;
+            }
+            return verticalOffset;
         }
 
         protected void OnPageNoChanged()
@@ -205,24 +212,24 @@ namespace PdfiumViewer
 
                 if (PagesDisplayMode == PdfViewerPagesDisplayMode.SinglePageMode)
                 {
-                    Frames = new Image[1];
+                    Frames = new PdfImage[1];
                     Panel.Orientation = Orientation.Horizontal;
                 }
                 else if (PagesDisplayMode == PdfViewerPagesDisplayMode.BookMode)
                 {
-                    Frames = new Image[2];
+                    Frames = new PdfImage[2];
                     Panel.Orientation = Orientation.Horizontal;
                 }
                 else if (PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode)
                 {
                     // frames created at scrolling
-                    Frames = new Image[Document.PageCount];
+                    Frames = new PdfImage[Document.PageCount];
                     Panel.Orientation = Orientation.Vertical;
                 }
 
                 for (var i = 0; i < Frames.Length; i++)
                 {
-                    Frames[i] = Frames[i] ?? new Image { Margin = FrameSpace };
+                    Frames[i] = Frames[i] ?? new PdfImage { Margin = FrameSpace, Renderer=this as PdfRenderer, PageNo = i };
 
                     var pageSize = CalculatePageSize(i);
                     Frames[i].Width = pageSize.Width;
@@ -247,7 +254,7 @@ namespace PdfiumViewer
             GotoPage(PageNo);
         }
 
-        protected BitmapImage RenderPage(Image frame, int page, int width, int height)
+        protected BitmapImage RenderPage(PdfImage frame, int page, int width, int height)
         {
             if (frame == null) return null;
 
@@ -281,6 +288,7 @@ namespace PdfiumViewer
                 frame.Width = width;
                 frame.Height = height;
                 frame.Source = bitmapImage;
+                frame.PageNo = page;
             });
             GC.Collect();
             return bitmapImage;

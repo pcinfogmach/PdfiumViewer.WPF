@@ -143,14 +143,14 @@ namespace PdfiumViewer
             return Document.RectangleFromPdf(page, rect);
         }
 
-        public void GotoPage(int page)
+        public void GotoPage(int page, bool forceRender = false)
         {
             if (IsDocumentLoaded)
             {
                 PageNo = page;
 
                 // ContinuousMode will be rendered in OnScrollChanged
-                if (PagesDisplayMode != PdfViewerPagesDisplayMode.ContinuousMode)
+                if (PagesDisplayMode != PdfViewerPagesDisplayMode.ContinuousMode || forceRender)
                 {
                     CurrentPageSize = CalculatePageSize(page);
                     RenderPage(Frame1, page, CurrentPageSize.Width, CurrentPageSize.Height);

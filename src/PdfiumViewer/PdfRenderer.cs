@@ -7,6 +7,8 @@ using PdfiumViewer.Core;
 using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
 using Size = System.Drawing.Size;
+using SizeF = System.Drawing.SizeF;
+using PointF = System.Drawing.PointF;
 
 namespace PdfiumViewer
 {
@@ -16,7 +18,7 @@ namespace PdfiumViewer
         {
             IsTabStop = true;
             Markers = new PdfMarkerCollection();
-            Markers.CollectionChanged += Markers_CollectionChanged;
+            //Markers.CollectionChanged += Markers_CollectionChanged;
         }
 
 
@@ -24,7 +26,7 @@ namespace PdfiumViewer
         /// Gets a collection with all markers.
         /// </summary>
         public PdfMarkerCollection Markers { get; }
-        private List<IPdfMarker>[] _markers;
+        private Dictionary<int, List<IPdfMarker>> _markersByPage;
 
         public void OpenPdf(string path, bool isRightToLeft = false)
         {
@@ -64,10 +66,12 @@ namespace PdfiumViewer
 
         public void UnLoad()
         {
+            PageNo = 0;
             Document?.Dispose();
             Document = null;
             Frames = null;
-            _markers = null;
+            Markers.Clear();
+            _markersByPage = null;
             Panel.Children.Clear();
             GC.Collect();
         }
@@ -128,30 +132,32 @@ namespace PdfiumViewer
         /// <param name="bounds">The PDF bounds to scroll into view.</param>
         public void ScrollIntoView(PdfRectangle bounds)
         {
-           ScrollIntoView(BoundsFromPdf(bounds));
+            Rect? bound = BoundsFromPdf(bounds);
+            if (bound != null)
+            {
+                ScrollIntoView(bounds.Page, bound.Value);
+            }
         }
 
         /// <summary>
         /// Scroll the client rectangle into view.
         /// </summary>
+        /// <param name="page">Page number</param>
         /// <param name="rectangle">The client rectangle to scroll into view.</param>
-        public void ScrollIntoView(Rect rectangle)
+        public void ScrollIntoView(int page, Rect rectangle)
         {
             var clientArea = GetScrollClientArea();
+            if (ScrollableWidth > 0)
+            {
+                ScrollToHorizontalOffset(rectangle.X - clientArea.Width / 2);
+            }
 
-            // if (rectangle.Top < 0 || rectangle.Bottom > clientArea.Height)
-            // {
-            //     var displayRectangle = DisplayRectangle;
-            //     int center = rectangle.Top + rectangle.Height / 2;
-            //     int documentCenter = center - displayRectangle.Y;
-            //     int displayCenter = clientArea.Height / 2;
-            //     int offset = documentCenter - displayCenter;
-            //
-            //     SetDisplayRectLocation(new Point(
-            //         displayRectangle.X,
-            //         -offset
-            //     ));
-            // }
+            if (ScrollableHeight > 0 && ZoomMode != PdfViewerZoomMode.FitHeight)
+            {
+                double verticalOffset = GetPageVerticalOffset(page);
+                verticalOffset += rectangle.Y - clientArea.Height / 2;
+                ScrollToVerticalOffset(verticalOffset);
+            }
         }
 
         /// <summary>
@@ -159,33 +165,92 @@ namespace PdfiumViewer
         /// </summary>
         /// <param name="bounds">The PDF bounds to convert.</param>
         /// <returns>The bounds of the PDF bounds in client coordinates.</returns>
-        public Rect BoundsFromPdf(PdfRectangle bounds)
+        public Rect? BoundsFromPdf(PdfRectangle bounds)
         {
             return BoundsFromPdf(bounds, true);
         }
 
-        private Rect BoundsFromPdf(PdfRectangle bounds, bool translateOffset)
+        private Rect? BoundsFromPdf(PdfRectangle bounds, bool translateOffset)
         {
-            var offset = translateOffset ? GetScrollOffset() : Size.Empty;
-            // var pageBounds = _pageCache[bounds.Page].Bounds;
-            // var pageSize = Document.PageSizes[bounds.Page];
-            //
-            // var translated = Document.RectangleFromPdf(
-            //     bounds.Page,
-            //     bounds.Bounds
-            // );
-            //
-            // var topLeft = TranslatePointFromPdf(pageBounds.Size, pageSize, new PointF(translated.Left, translated.Top));
-            // var bottomRight = TranslatePointFromPdf(pageBounds.Size, pageSize, new PointF(translated.Right, translated.Bottom));
-            //
-            // return new Rectangle(
-            //     pageBounds.Left + offset.Width + Math.Min(topLeft.X, bottomRight.X),
-            //     pageBounds.Top + offset.Height + Math.Min(topLeft.Y, bottomRight.Y),
-            //     Math.Abs(bottomRight.X - topLeft.X),
-            //     Math.Abs(bottomRight.Y - topLeft.Y)
-            // );
+            PdfImage frame;
+            if (PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode)
+            {
+                frame = Frames[bounds.Page];
+            }
+            else
+            {
+                frame = Frame1;
+                if (frame?.PageNo != bounds.Page)
+                {
+                    frame = Frame2;
+                }
+            }
+            if (frame == null) return null;
 
-            return new Rect(offset.Width, offset.Height, offset.Width, offset.Height);
+            var pageBoundsSize = new Size((int)frame.Width, (int)frame.Height);
+
+            var pageSize = Document.PageSizes[bounds.Page];
+
+            var translated = Document.RectangleFromPdf(
+                bounds.Page,
+                bounds.Bounds
+            );
+
+            var topLeft = TranslatePointFromPdf(pageBoundsSize, pageSize, new PointF(translated.Left, translated.Top));
+            var bottomRight = TranslatePointFromPdf(pageBoundsSize, pageSize, new PointF(translated.Right, translated.Bottom));
+
+            return new Rect(
+                Math.Min(topLeft.X, bottomRight.X),
+                Math.Min(topLeft.Y, bottomRight.Y),
+                Math.Abs(bottomRight.X - topLeft.X),
+                Math.Abs(bottomRight.Y - topLeft.Y)
+            );
+        }
+
+        private PointF TranslatePointToPdf(Size size, SizeF pageSize, Point point)
+        {
+            switch (Rotate)
+            {
+                case PdfRotation.Rotate90:
+                    point = new Point(size.Height - point.Y, point.X);
+                    size = new Size(size.Height, size.Width);
+                    break;
+                case PdfRotation.Rotate180:
+                    point = new Point(size.Width - point.X, size.Height - point.Y);
+                    break;
+                case PdfRotation.Rotate270:
+                    point = new Point(point.Y, size.Width - point.X);
+                    size = new Size(size.Height, size.Width);
+                    break;
+            }
+
+            return new PointF(
+                ((float)point.X / size.Width) * pageSize.Width,
+                ((float)point.Y / size.Height) * pageSize.Height
+            );
+        }
+
+        private Point TranslatePointFromPdf(Size size, SizeF pageSize, PointF point)
+        {
+            switch (Rotate)
+            {
+                case PdfRotation.Rotate90:
+                    point = new PointF(pageSize.Height - point.Y, point.X);
+                    pageSize = new SizeF(pageSize.Height, pageSize.Width);
+                    break;
+                case PdfRotation.Rotate180:
+                    point = new PointF(pageSize.Width - point.X, pageSize.Height - point.Y);
+                    break;
+                case PdfRotation.Rotate270:
+                    point = new PointF(point.Y, pageSize.Width - point.X);
+                    pageSize = new SizeF(pageSize.Height, pageSize.Width);
+                    break;
+            }
+
+            return new Point(
+                (int)((point.X / pageSize.Width) * size.Width),
+                (int)((point.Y / pageSize.Height) * size.Height)
+            );
         }
 
         private Size GetScrollOffset()
@@ -204,60 +269,43 @@ namespace PdfiumViewer
             return new Rect(0, 0, (int)ViewportWidth, (int)ViewportHeight);
         }
 
-        private void EnsureMarkers()
+        public void EnsureMarkers()
         {
-            if (_markers != null)
+            if (_markersByPage != null)
                 return;
 
-            _markers = new List<IPdfMarker>[1];
+            _markersByPage = new Dictionary<int, List<IPdfMarker>>();
 
             foreach (var marker in Markers)
             {
-                if (marker.Page < 0 || marker.Page >= _markers.Length)
+                if (marker.Page < 0 || marker.Page >= PageCount)
                     continue;
 
-                _markers[marker.Page] = _markers[marker.Page] ?? new List<IPdfMarker>();
-                _markers[marker.Page].Add(marker);
-            }
-        }
-
-        private void DrawMarkers(DrawingContext graphics, int page)
-        {
-            if (_markers?.Length > 0 && _markers.Length > page)
-            {
-                var markers = _markers[page];
-                if (markers == null)
-                    return;
-
-                foreach (var marker in markers)
+                List<IPdfMarker> pageMarkers;
+                _markersByPage.TryGetValue(marker.Page, out pageMarkers);
+                if (pageMarkers == null)
                 {
-                    marker.Draw(this, graphics);
+                    pageMarkers = new List<IPdfMarker>();
+                    _markersByPage.Add(marker.Page, pageMarkers);
                 }
+                pageMarkers.Add(marker);
             }
         }
 
-        private void Markers_CollectionChanged(object sender, EventArgs e)
+        public void DrawMarkers(DrawingContext graphics, int page)
         {
-            RedrawMarkers();
+            List<IPdfMarker> pageMarkers = null;
+            _markersByPage?.TryGetValue(page, out pageMarkers);
+            if (pageMarkers == null) return;
+            foreach (var marker in pageMarkers)
+            {
+                marker.Draw(this, graphics);
+            }
         }
 
-        private void RedrawMarkers()
+        public void RedrawMarkers()
         {
-            _markers = null;
-
-            GotoPage(PageNo);
-        }
-
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            base.OnRender(drawingContext);
-
-            if (Document == null)
-                return;
-
-            EnsureMarkers();
-
-            DrawMarkers(drawingContext, PageNo);
+            _markersByPage = null;
         }
 
         protected override void Dispose(bool disposing)

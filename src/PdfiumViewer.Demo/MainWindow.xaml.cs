@@ -89,8 +89,12 @@ namespace PdfiumViewer.Demo
         public bool IsSearchOpen { get => _isSearchOpen; set => SetProperty(ref _isSearchOpen, value); }
         private bool _isSearchOpen;
 
-        public int SearchMatchItemNo { get; set; }
-        public int SearchMatchesCount { get; set; }
+        public int SearchMatchItemNo { get => _searchMatchItemNo; set => SetProperty(ref _searchMatchItemNo, value); }
+        private int _searchMatchItemNo;
+
+        public int SearchMatchesCount { get => _searchMatchesCount; set => SetProperty(ref _searchMatchesCount, value); }
+        private int _searchMatchesCount;
+
         public int Page
         {
             get => Renderer.PageNo + 1;
@@ -139,6 +143,7 @@ namespace PdfiumViewer.Demo
 
             if (dialog.ShowDialog() == true)
             {
+                SearchManager.Reset();
                 Renderer.OpenPdf(new FileStream(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 // Open Thumbnails
@@ -339,7 +344,7 @@ namespace PdfiumViewer.Demo
             else
             {
                 SearchMatchesCount = SearchManager.MatchesCount;
-                // DisplayTextSpan(SearchMatches.Items[SearchMatchItemNo++].TextSpan);
+                SearchMatchItemNo = 1;
             }
 
             if (!SearchManager.FindNext(true))
@@ -357,7 +362,6 @@ namespace PdfiumViewer.Demo
             if (SearchMatchesCount > SearchMatchItemNo)
             {
                 SearchMatchItemNo++;
-                //DisplayTextSpan(SearchMatches.Items[SearchMatchItemNo - 1].TextSpan);
                 SearchManager.FindNext(true);
             }
         }
@@ -367,7 +371,6 @@ namespace PdfiumViewer.Demo
             if (SearchMatchItemNo > 1)
             {
                 SearchMatchItemNo--;
-                // DisplayTextSpan(SearchMatches.Items[SearchMatchItemNo - 1].TextSpan);
                 SearchManager.FindNext(false);
             }
         }
@@ -480,5 +483,10 @@ namespace PdfiumViewer.Demo
         }
 
         #endregion
+
+        private void SearchPopup_Opened(object sender, EventArgs e)
+        {
+            SearchTermTextBox.Focus();
+        }
     }
 }

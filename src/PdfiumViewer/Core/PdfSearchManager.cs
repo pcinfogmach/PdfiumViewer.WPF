@@ -150,8 +150,6 @@ namespace PdfiumViewer.Core
                 _firstMatch = _offset;
 
                 UpdateHighlights();
-                ScrollCurrentIntoView();
-
                 return true;
             }
 
@@ -169,16 +167,19 @@ namespace PdfiumViewer.Core
             }
 
             UpdateHighlights();
-            ScrollCurrentIntoView();
 
             return _offset != _firstMatch;
         }
 
         private void ScrollCurrentIntoView()
         {
+            if (_offset == -1) return;
             var current = _bounds[_offset];
             if (current.Count > 0)
+            {
+                Renderer.GotoPage(current[0].Page, forceRender: true);
                 Renderer.ScrollIntoView(current[0]);
+            }
         }
 
         private int FindFirstFromCurrentPage()
@@ -217,13 +218,16 @@ namespace PdfiumViewer.Core
             {
                 for (int i = 0; i < _matches.Items.Count; i++)
                 {
-                    AddMatch(i, i == _offset);
+                    bool current = _offset == -1 ? false : i == _offset;
+                    AddMatch(i, current);
                 }
             }
             else if (_offset != -1)
             {
                 AddMatch(_offset, true);
             }
+            Renderer.RedrawMarkers();
+            ScrollCurrentIntoView();
         }
 
         private void AddMatch(int index, bool current)
