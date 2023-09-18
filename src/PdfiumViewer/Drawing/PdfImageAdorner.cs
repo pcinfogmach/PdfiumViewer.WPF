@@ -11,6 +11,7 @@ namespace PdfiumViewer.Drawing
         // Be sure to call the base class constructor.
         public PdfImageAdorner(UIElement adornedElement) : base(adornedElement)
         {
+            IsClipEnabled = true;
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -22,6 +23,8 @@ namespace PdfiumViewer.Drawing
                 Rect adornedElementRect = new Rect(this.AdornedElement.DesiredSize);
                 image.Renderer.EnsureMarkers();
                 image.Renderer.DrawMarkers(drawingContext, image.PageNo);
+
+                image.Renderer.DrawTextSelection(drawingContext, image.PageNo, image.Renderer.TextSelectionState);
             }
         }
     }

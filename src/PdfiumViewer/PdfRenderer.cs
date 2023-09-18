@@ -13,7 +13,7 @@ using System.Windows.Documents;
 
 namespace PdfiumViewer
 {
-    public class PdfRenderer : ScrollPanel
+    public partial class PdfRenderer : ScrollPanel
     {
         public PdfRenderer()
         {
@@ -310,11 +310,16 @@ namespace PdfiumViewer
             }
         }
 
+        public void UpdateAdorner()
+        {
+            AdornerLayer layer = AdornerLayer.GetAdornerLayer(this);
+            layer?.Update();
+        }
+
         public void RedrawMarkers()
         {
             _markersByPage = null;
-            AdornerLayer layer = AdornerLayer.GetAdornerLayer(this);
-            layer?.Update();
+            UpdateAdorner();
         }
 
         protected override void Dispose(bool disposing)

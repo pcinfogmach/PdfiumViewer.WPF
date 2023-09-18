@@ -1,5 +1,8 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
+
+using Size = System.Drawing.Size;
 
 namespace PdfiumViewer.Drawing
 {
@@ -8,6 +11,15 @@ namespace PdfiumViewer.Drawing
         public PdfRenderer Renderer { get; set; }
         public int PageNo {get; set; }
         private Adorner _adorner = null;
+
+        public PdfImage() : base()
+        {
+            ClipToBounds = true;
+            Focusable = false;
+            PreviewMouseLeftButtonDown += PdfImage_PreviewMouseLeftButtonDown;
+            PreviewMouseLeftButtonUp += PdfImage_PreviewMouseLeftButtonUp;
+            PreviewMouseMove += PdfImage_PreviewMouseMove;
+        }
 
         public void AddAdorner()
         {
@@ -28,6 +40,41 @@ namespace PdfiumViewer.Drawing
                 AdornerLayer layer = AdornerLayer.GetAdornerLayer(Renderer);
                 layer?.Remove(_adorner);
                 _adorner = null;
+            }
+        }
+
+        private void PdfImage_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (Renderer.CursorMode == PdfViewerCursorMode.TextSelection)
+            {
+                var viewSize = new Size((int)Width, (int)Height);
+                var location = e.GetPosition(this);
+                if (e.ClickCount == 1)
+                {
+                    Renderer.HandleMouseDownForTextSelection(this, PageNo, viewSize, location);
+                }
+                else if (e.ClickCount == 2)
+                {
+                    Renderer.HandleMouseDoubleClickForTextSelection(this, PageNo, viewSize, location);
+                }
+            }
+        }
+
+        private void PdfImage_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (Renderer.CursorMode == PdfViewerCursorMode.TextSelection)
+            {
+                Renderer.HandleMouseUpForTextSelection(this);
+            }
+        }
+
+        private void PdfImage_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (Renderer.CursorMode == PdfViewerCursorMode.TextSelection)
+            {
+                var viewSize = new Size((int)Width, (int)Height);
+                var location = e.GetPosition(this);
+                Renderer.HandleMouseMoveForTextSelection(PageNo, viewSize, location);
             }
         }
     }

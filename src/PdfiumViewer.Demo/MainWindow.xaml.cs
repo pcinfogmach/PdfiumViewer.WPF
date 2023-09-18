@@ -64,8 +64,14 @@ namespace PdfiumViewer.Demo
             MatchCaseCheckBox.IsChecked = SearchManager.MatchCase;
             WholeWordOnlyCheckBox.IsChecked = SearchManager.MatchWholeWord;
             HighlightAllMatchesCheckBox.IsChecked = SearchManager.HighlightAllMatches;
+
+            Loaded += MainWindow_Loaded;
         }
 
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Renderer.Focus();
+        }
 
         private Process CurrentProcess { get; }
         private CancellationTokenSource Cts { get; }
@@ -322,6 +328,7 @@ namespace PdfiumViewer.Demo
         {
             var toggle = (ToggleButton)sender;
             Renderer.EnableKinetic = toggle.IsChecked == true;
+            Renderer.CursorMode = toggle.IsChecked == true ? PdfViewerCursorMode.Pan : PdfViewerCursorMode.TextSelection;
         }
 
         #region Search
@@ -498,6 +505,7 @@ namespace PdfiumViewer.Demo
                 ThumbnailRenderer.PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
                 ThumbnailRenderer.SetZoomMode(PdfViewerZoomMode.FitWidth);
                 ThumbnailRenderer.IsZoomAllowed = false;
+                ThumbnailRenderer.CursorMode = PdfViewerCursorMode.Pan;
                 IsThumbnailLoaded = true;
             }
         }

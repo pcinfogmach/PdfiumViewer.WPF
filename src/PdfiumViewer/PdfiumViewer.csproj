@@ -67,6 +67,7 @@
     <Compile Include="Core\PdfMarkerCollection.cs" />
     <Compile Include="Core\PdfMatch.cs" />
     <Compile Include="Core\PdfMatches.cs" />
+    <Compile Include="Core\PdfMouseState.cs" />
     <Compile Include="Core\PdfPageLink.cs" />
     <Compile Include="Core\PdfPageLinks.cs" />
     <Compile Include="Core\PdfPrintDocument.cs">
@@ -75,6 +76,7 @@
     <Compile Include="Core\PdfPrintMultiplePages.cs" />
     <Compile Include="Core\PdfPrintSettings.cs" />
     <Compile Include="Core\PdfSearchManager.cs" />
+    <Compile Include="Core\PdfTextSelectionState.cs" />
     <Compile Include="Drawing\PdfImage.cs" />
     <Compile Include="Drawing\PdfImageAdorner.cs" />
     <Compile Include="Drawing\PdfPoint.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="Enums\PdfPrintMode.cs" />
     <Compile Include="Enums\PdfRenderFlags.cs" />
     <Compile Include="Enums\PdfRotation.cs" />
+    <Compile Include="Enums\PdfViewerCursorMode.cs" />
     <Compile Include="Enums\PdfViewerPagesDisplayMode.cs" />
     <Compile Include="Enums\PdfViewerZoomMode.cs" />
     <Compile Include="Enums\ScrollAction.cs" />
@@ -97,6 +100,7 @@
     <Compile Include="ScrollPanel.cs" />
     <Compile Include="ScrollPanel.Kinetic.cs" />
     <Compile Include="ScrollPanel.PdfDocument.cs" />
+    <Compile Include="PdfRenderer.TextSelection.cs" />
     <Compile Include="ScrollPanel.Zooming.cs" />
   </ItemGroup>
   <ItemGroup>
