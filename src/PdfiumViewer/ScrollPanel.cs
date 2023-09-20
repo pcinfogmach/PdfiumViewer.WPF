@@ -47,16 +47,16 @@ namespace PdfiumViewer
         {
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
-            Effect = new DropShadowEffect()
+            Panel = new StackPanel()
+            {
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            Panel.Effect = new DropShadowEffect()
             {
                 BlurRadius = 10,
                 Direction = 270,
                 RenderingBias = RenderingBias.Performance,
                 ShadowDepth = 0
-            };
-            Panel = new StackPanel()
-            {
-                HorizontalAlignment = HorizontalAlignment.Center
             };
             VirtualizingPanel.SetIsVirtualizing(Panel, true);
             VirtualizingPanel.SetVirtualizationMode(Panel, VirtualizationMode.Recycling);

@@ -19,8 +19,7 @@ namespace PdfiumViewer.Drawing
             PdfImage image = AdornedElement as PdfImage;
             if (image.Source != null)
             {
-                Debug.WriteLine("PdfImageAdorner.OnRender[" + image.PageNo + "]");
-                Rect adornedElementRect = new Rect(this.AdornedElement.DesiredSize);
+                //Debug.WriteLine("PdfImageAdorner.OnRender[" + image.PageNo + "]");
                 image.Renderer.EnsureMarkers();
                 image.Renderer.DrawMarkers(drawingContext, image.PageNo);
 
