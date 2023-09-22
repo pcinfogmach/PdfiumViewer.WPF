@@ -139,7 +139,7 @@ namespace PdfiumViewer
                     end = Document.CountCharacters(page);
 
                 Geometry geometry = null;
-                SolidColorBrush brush = new SolidColorBrush(SystemColors.HighlightColor) { Opacity = .7 };
+                SolidColorBrush brush = new SolidColorBrush(SystemColors.HighlightColor) { Opacity = .5 };
                 foreach (var rectangle in Document.GetTextRectangles(page, start, end - start))
                 {
                     Rect? bounds = BoundsFromPdf(rectangle);
@@ -201,13 +201,25 @@ namespace PdfiumViewer
 
             if (characterIndex >= 0)
             {
-                TextSelectionState = new PdfTextSelectionState()
+                if (Keyboard.Modifiers == ModifierKeys.Shift && TextSelectionState != null)
                 {
-                    StartPage = pdfLocation.Page,
-                    StartIndex = characterIndex,
-                    EndPage = -1,
-                    EndIndex = -1
-                };
+                    // Extend selection
+                    TextSelectionState.EndPage = pdfLocation.Page;
+                    TextSelectionState.EndIndex = characterIndex;
+                    UpdateAdorner();
+                }
+                else
+                {
+                    // Start new selection
+                    TextSelectionState = new PdfTextSelectionState()
+                    {
+                        StartPage = pdfLocation.Page,
+                        StartIndex = characterIndex,
+                        EndPage = -1,
+                        EndIndex = -1
+                    };
+                }
+
                 _isSelectingText = true;
                 sender.CaptureMouse();
             }
@@ -262,6 +274,8 @@ namespace PdfiumViewer
                     EndIndex = word.Offset + word.Length
                 };
 
+                _isSelectingText = true;
+                sender.CaptureMouse();
                 UpdateAdorner();
                 return true;
             }
