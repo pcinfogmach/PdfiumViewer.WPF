@@ -8,13 +8,16 @@ using System.Windows.Media;
 using System.Windows.Input;
 
 using Size = System.Drawing.Size;
+using System;
 
 namespace PdfiumViewer
 {
     public partial class PdfRenderer
     {
         private bool _isSelectingText = false;
+        private bool _isSelectingWord = false;
         private PdfMouseState _cachedMouseState = null;
+        private PdfTextSelectionState _startTextSelectionState = null;
 
         public PdfTextSelectionState TextSelectionState { get; set; } = null;
         protected bool MousePanningEnabled { get; set; } = true;
@@ -116,7 +119,16 @@ namespace PdfiumViewer
         {
             var text = SelectedText;
             if (text?.Length > 0)
-                Clipboard.SetText(text);
+            {
+                try
+                {
+                    Clipboard.SetText(text);
+                }
+                catch (Exception)
+                {
+                    // ignore
+                };
+            }
         }
 
         public void DrawTextSelection(DrawingContext graphics, int page, PdfTextSelectionState state)
@@ -204,20 +216,27 @@ namespace PdfiumViewer
                 if (Keyboard.Modifiers == ModifierKeys.Shift && TextSelectionState != null)
                 {
                     // Extend selection
-                    TextSelectionState.EndPage = pdfLocation.Page;
-                    TextSelectionState.EndIndex = characterIndex;
+                    var newSelectionLetter = new PdfTextSelectionState()
+                    {
+                        StartPage = pdfLocation.Page,
+                        EndPage = pdfLocation.Page,
+                        StartIndex = characterIndex,
+                        EndIndex = characterIndex
+                    };
+                    TextSelectionState = PdfTextSelectionState.Merge(_startTextSelectionState, newSelectionLetter);
                     UpdateAdorner();
                 }
                 else
                 {
                     // Start new selection
-                    TextSelectionState = new PdfTextSelectionState()
+                    _startTextSelectionState = new PdfTextSelectionState()
                     {
                         StartPage = pdfLocation.Page,
                         StartIndex = characterIndex,
                         EndPage = -1,
                         EndIndex = -1
                     };
+                    TextSelectionState = _startTextSelectionState;
                 }
 
                 _isSelectingText = true;
@@ -226,7 +245,9 @@ namespace PdfiumViewer
             else
             {
                 _isSelectingText = false;
+                _isSelectingWord = false;
                 sender.ReleaseMouseCapture();
+                _startTextSelectionState = null;
                 TextSelectionState = null;
             }
             return true;
@@ -235,7 +256,9 @@ namespace PdfiumViewer
         public void HandleMouseUpForTextSelection(PdfImage sender)
         {
             _isSelectingText = false;
+            _isSelectingWord = false;
             sender.ReleaseMouseCapture();
+            TextSelectionState?.Normalize();
             UpdateAdorner();
         }
 
@@ -247,8 +270,32 @@ namespace PdfiumViewer
                 Cursor = Cursors.IBeam;
                 if (_isSelectingText)
                 {
-                    TextSelectionState.EndPage = mouseState.PdfLocation.Page;
-                    TextSelectionState.EndIndex = mouseState.CharacterIndex;
+                    if (_isSelectingWord)
+                    {
+                        if (Document.GetWordAtPosition(mouseState.PdfLocation, 4f, 4f, out var word))
+                        {
+                            var newSelectionWord = new PdfTextSelectionState()
+                            {
+                                StartPage = mouseState.PdfLocation.Page,
+                                EndPage = mouseState.PdfLocation.Page,
+                                StartIndex = word.Offset,
+                                EndIndex = word.Offset + word.Length
+                            };
+                            TextSelectionState = PdfTextSelectionState.Merge(_startTextSelectionState, newSelectionWord);
+                        }
+
+                    }
+                    else
+                    {
+                        var newSelectionLetter = new PdfTextSelectionState()
+                        {
+                            StartPage = mouseState.PdfLocation.Page,
+                            EndPage = mouseState.PdfLocation.Page,
+                            StartIndex = mouseState.CharacterIndex,
+                            EndIndex = mouseState.CharacterIndex
+                        };
+                        TextSelectionState = PdfTextSelectionState.Merge(_startTextSelectionState, newSelectionLetter);
+                    }
                     UpdateAdorner();
                 }
             }
@@ -266,15 +313,17 @@ namespace PdfiumViewer
 
             if (Document.GetWordAtPosition(pdfLocation, 4f, 4f, out var word))
             {
-                TextSelectionState = new PdfTextSelectionState()
+                _startTextSelectionState = new PdfTextSelectionState()
                 {
                     StartPage = pdfLocation.Page,
                     EndPage = pdfLocation.Page,
                     StartIndex = word.Offset,
                     EndIndex = word.Offset + word.Length
                 };
+                TextSelectionState = _startTextSelectionState;
 
                 _isSelectingText = true;
+                _isSelectingWord = true;
                 sender.CaptureMouse();
                 UpdateAdorner();
                 return true;

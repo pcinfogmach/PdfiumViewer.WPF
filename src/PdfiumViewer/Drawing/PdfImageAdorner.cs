@@ -12,6 +12,7 @@ namespace PdfiumViewer.Drawing
         public PdfImageAdorner(UIElement adornedElement) : base(adornedElement)
         {
             IsClipEnabled = true;
+            IsHitTestVisible = false;
         }
 
         protected override void OnRender(DrawingContext drawingContext)
