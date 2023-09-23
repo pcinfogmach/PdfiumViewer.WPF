@@ -16,6 +16,7 @@ namespace PdfiumViewer
     {
         private bool _isSelectingText = false;
         private bool _isSelectingWord = false;
+        private bool _isDragAndDropText = false;
         private PdfMouseState _cachedMouseState = null;
         private PdfTextSelectionState _startTextSelectionState = null;
 
@@ -213,7 +214,13 @@ namespace PdfiumViewer
 
             if (characterIndex >= 0)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift && TextSelectionState != null)
+                _isDragAndDropText = false;
+                if (TextSelectionState?.IsPositionInside(pdfLocation.Page, characterIndex) == true)
+                {
+                    // click on existing selection
+                    _isDragAndDropText = true;
+                }
+                else if (Keyboard.Modifiers == ModifierKeys.Shift && TextSelectionState != null)
                 {
                     // Extend selection
                     var newSelectionLetter = new PdfTextSelectionState()
@@ -257,13 +264,25 @@ namespace PdfiumViewer
         {
             _isSelectingText = false;
             _isSelectingWord = false;
+            _isDragAndDropText = false;
             sender.ReleaseMouseCapture();
             TextSelectionState?.Normalize();
             UpdateAdorner();
         }
 
-        public void HandleMouseMoveForTextSelection(int page, Size viewSize, Point mouseLocation)
+        public void HandleMouseMoveForTextSelection(PdfImage sender, int page, Size viewSize, Point mouseLocation)
         {
+            if (_isDragAndDropText)
+            {
+                // move existing selection -> Start drag and drop
+                var text = SelectedText;
+                DragDrop.DoDragDrop(sender, text, DragDropEffects.Copy);
+                _isDragAndDropText = false;
+                _isSelectingText = false;
+                _isSelectingWord = false;
+                return;
+            }
+
             var mouseState = GetMouseState(page, viewSize, mouseLocation);
             if (mouseState.CharacterIndex >= 0)
             {

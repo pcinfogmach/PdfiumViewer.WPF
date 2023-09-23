@@ -74,7 +74,7 @@ namespace PdfiumViewer.Drawing
             {
                 var viewSize = new Size((int)Width, (int)Height);
                 var location = e.GetPosition(this);
-                Renderer.HandleMouseMoveForTextSelection(PageNo, viewSize, location);
+                Renderer.HandleMouseMoveForTextSelection(this, PageNo, viewSize, location);
             }
         }
     }

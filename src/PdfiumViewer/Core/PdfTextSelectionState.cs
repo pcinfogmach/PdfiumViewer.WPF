@@ -49,6 +49,14 @@
             }
         }
 
+        public bool IsPositionInside(int page, int pos)
+        {
+            if (page < StartPage || page > EndPage) return false;
+            if (page == StartPage && pos < StartIndex) return false;
+            if (page == EndPage && pos > EndIndex) return false;
+            return true;
+        }
+
         /// <summary>
         /// Merge two selection region to one. 
         /// Normalize the region before merge.
