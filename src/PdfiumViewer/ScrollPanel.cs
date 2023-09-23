@@ -298,6 +298,7 @@ namespace PdfiumViewer
                 frame.Height = height;
                 frame.Source = bitmapImage;
                 frame.PageNo = page;
+                frame.PageLinks = GetPageLinks(page, new Size(width, height));
             });
             GC.Collect();
             return bitmapImage;

@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using PdfiumViewer.Core;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 
@@ -9,7 +10,8 @@ namespace PdfiumViewer.Drawing
     public class PdfImage : Image
     {
         public PdfRenderer Renderer { get; set; }
-        public int PageNo {get; set; }
+        public int PageNo { get; set; }
+        public PdfPageLinks PageLinks { get; set; }
         private Adorner _adorner = null;
 
         public PdfImage() : base()
@@ -62,6 +64,10 @@ namespace PdfiumViewer.Drawing
 
         private void PdfImage_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            var viewSize = new Size((int)Width, (int)Height);
+            var location = e.GetPosition(this);
+            Renderer.HandleMouseUpForLinks(this, PageNo, viewSize, location);
+
             if (Renderer.CursorMode == PdfViewerCursorMode.TextSelection)
             {
                 Renderer.HandleMouseUpForTextSelection(this);

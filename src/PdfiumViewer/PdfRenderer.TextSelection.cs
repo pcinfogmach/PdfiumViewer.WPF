@@ -9,6 +9,7 @@ using System.Windows.Input;
 
 using Size = System.Drawing.Size;
 using System;
+using System.Diagnostics;
 
 namespace PdfiumViewer
 {
@@ -204,7 +205,7 @@ namespace PdfiumViewer
             e.Handled = handled;
         }
 
-        public bool HandleMouseDownForTextSelection(PdfImage sender, int page, Size viewSize, Point mouseLocation)
+        internal bool HandleMouseDownForTextSelection(PdfImage sender, int page, Size viewSize, Point mouseLocation)
         {
             var pdfLocation = PointToPdf(page, viewSize, mouseLocation);
             if (!pdfLocation.IsValid)
@@ -260,7 +261,7 @@ namespace PdfiumViewer
             return true;
         }
 
-        public void HandleMouseUpForTextSelection(PdfImage sender)
+        internal void HandleMouseUpForTextSelection(PdfImage sender)
         {
             _isSelectingText = false;
             _isSelectingWord = false;
@@ -270,7 +271,7 @@ namespace PdfiumViewer
             UpdateAdorner();
         }
 
-        public void HandleMouseMoveForTextSelection(PdfImage sender, int page, Size viewSize, Point mouseLocation)
+        internal void HandleMouseMoveForTextSelection(PdfImage sender, int page, Size viewSize, Point mouseLocation)
         {
             if (_isDragAndDropText)
             {
@@ -284,7 +285,12 @@ namespace PdfiumViewer
             }
 
             var mouseState = GetMouseState(page, viewSize, mouseLocation);
-            if (mouseState.CharacterIndex >= 0)
+            var link = sender.PageLinks.GetLinkOnLocation(mouseState.PdfLocation.Location);
+            if (link != null)
+            {
+                Cursor = Cursors.Hand;
+            }
+            else if (mouseState.CharacterIndex >= 0)
             {
                 Cursor = Cursors.IBeam;
                 if (_isSelectingText)
@@ -324,7 +330,7 @@ namespace PdfiumViewer
             }
         }
 
-        public bool HandleMouseDoubleClickForTextSelection(PdfImage sender, int page, Size viewSize, Point mouseLocation)
+        internal bool HandleMouseDoubleClickForTextSelection(PdfImage sender, int page, Size viewSize, Point mouseLocation)
         {
             var pdfLocation = PointToPdf(page, viewSize, mouseLocation);
             if (!pdfLocation.IsValid)
@@ -351,7 +357,7 @@ namespace PdfiumViewer
             return false;
         }
 
-        public PdfMouseState GetMouseState(int page, Size viewSize, Point mouseLocation)
+        private PdfMouseState GetMouseState(int page, Size viewSize, Point mouseLocation)
         {
             // OnMouseMove and OnSetCursor get invoked a lot, often multiple times in succession for the same point.
             // By just caching the mouse state for the last known position we can save a lot of work.
@@ -388,5 +394,52 @@ namespace PdfiumViewer
             translated = Document.PointToPdf(page, new System.Drawing.Point((int)translated.X, (int)translated.Y));
             return new PdfPoint(page, translated);
         }
+
+        #region Links
+
+        /// <summary>
+        /// Occurs when a link in the pdf document is clicked.
+        /// </summary>
+        [Category("Action")]
+        [Description("Occurs when a link in the pdf document is clicked.")]
+        public event LinkClickEventHandler LinkClick;
+
+        private void HandleLinkClick(LinkClickEventArgs e)
+        {
+            LinkClick?.Invoke(this, e);
+
+            if (e.Handled)
+                return;
+
+            if (e.Link.TargetPage.HasValue)
+            {
+                GotoPage(e.Link.TargetPage.Value);
+            }
+            else if (!string.IsNullOrEmpty(e.Link.Uri))
+            {
+                try
+                {
+                    Process.Start(e.Link.Uri);
+                }
+                catch
+                {
+                    // Some browsers (Firefox) will cause an exception to
+                    // be thrown (when it auto-updates).
+                }
+            }
+        }
+
+        internal void HandleMouseUpForLinks(PdfImage sender, int page, Size viewSize, Point mouseLocation)
+        {
+            var mouseState = GetMouseState(page, viewSize, mouseLocation);
+            var link = sender.PageLinks.GetLinkOnLocation(mouseState.PdfLocation.Location);
+            if (link != null)
+            {
+                var linkClickEventArgs = new LinkClickEventArgs(link);
+                HandleLinkClick(linkClickEventArgs);
+            }
+        }
+
+        #endregion
     }
 }

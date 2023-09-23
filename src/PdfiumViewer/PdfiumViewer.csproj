@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\IPdfMarker.cs" />
+    <Compile Include="Core\LinkClickEventHandler.cs" />
     <Compile Include="Core\NativeMethods.cs" />
     <Compile Include="Core\NativeMethods.Pdfium.cs" />
     <Compile Include="Core\PdfBookmarkCollection.cs" />

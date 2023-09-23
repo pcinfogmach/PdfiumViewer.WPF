@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 
 namespace PdfiumViewer.Core
 {
@@ -24,6 +25,18 @@ namespace PdfiumViewer.Core
                 throw new ArgumentNullException(nameof(links));
 
             Links = new ReadOnlyCollection<PdfPageLink>(links);
+        }
+
+        public PdfPageLink GetLinkOnLocation(PointF pdfLocation)
+        {
+            if (Links != null)
+            {
+                foreach(var link in Links)
+                {
+                    if (link.Bounds.Contains(pdfLocation)) return link;
+                }
+            }
+            return null;
         }
     }
 }

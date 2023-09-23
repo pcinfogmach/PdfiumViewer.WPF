@@ -111,10 +111,10 @@ namespace PdfiumViewer.Core
 
                 var rect = new NativeMethods.FS_RECTF();
 
-                if (NativeMethods.FPDFLink_GetAnnotRect(annotation, rect) && (target.HasValue || uri != null))
+                if (NativeMethods.FPDFLink_GetAnnotRect(annotation, rect) && (target.HasValue || !string.IsNullOrEmpty(uri)))
                 {
                     links.Add(new PdfPageLink(
-                        new RectangleF(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top),
+                        new RectangleF(rect.left, rect.bottom, rect.right - rect.left, rect.top - rect.bottom),
                         target,
                         uri
                     ));
