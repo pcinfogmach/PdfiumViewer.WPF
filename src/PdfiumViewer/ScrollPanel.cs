@@ -1,13 +1,12 @@
 ﻿using PdfiumViewer.Core;
 using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
+using PdfiumViewer.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -263,33 +262,24 @@ namespace PdfiumViewer
             GotoPage(PageNo);
         }
 
-        protected BitmapImage RenderPage(PdfImage frame, int page, int width, int height)
+        protected BitmapSource RenderPage(PdfImage frame, int page, int width, int height)
         {
             if (frame == null) return null;
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            // Note: direct convert the pdfium output to WriteableBitmap has a sighly worse performance than Render + ToBitmapSource2 method
+            // var bitmapImage = Document.Render2(page, (int)(width * 1.2f), (int)(height * 1.2f), Dpi, Dpi, Rotate, Flags, false);
+
             var image = Document.Render(page, (int)(width * 1.2f), (int)(height * 1.2f), Dpi, Dpi, Rotate, Flags);
-            BitmapImage bitmapImage;
-            using (var memory = new MemoryStream())
-            {
-                image.Save(memory, ImageFormat.Png);
-                memory.Position = 0;
-                bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad; // not a mistake - see below
-                bitmapImage.EndInit();
-                image.Dispose();
-            }
-            // Why BitmapCacheOption.OnLoad?
-            // It seems counter intuitive, but this flag has two effects:
-            // It enables caching if caching is possible, and it causes the load to happen at EndInit().
-            // In our case caching is impossible, so all it does it cause the load to happen immediately.
+
+            var partTime = stopwatch.ElapsedMilliseconds;
+
+            BitmapSource bitmapImage = BitmapHelper.ToBitmapSource2(image as Bitmap);
 
             stopwatch.Stop();
-            Debug.WriteLine("RenderPage[" + page + "]: " + stopwatch.ElapsedMilliseconds + " mS, size=" + width + " x " + height);
+            Debug.WriteLine("RenderPage[" + page + "]: " + (stopwatch.ElapsedMilliseconds) + " mS, (" + (stopwatch.ElapsedMilliseconds - partTime) +" mS) size=" + width + " x " + height);
 
             //CurrentProcess?.Refresh();
             Dispatcher.Invoke(() =>

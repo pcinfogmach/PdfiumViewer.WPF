@@ -10,6 +10,8 @@ using System.Windows.Interop;
 using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
 
+using WriteableBitmap = System.Windows.Media.Imaging.WriteableBitmap;
+
 namespace PdfiumViewer.Core
 {
     /// <summary>
@@ -352,6 +354,77 @@ namespace PdfiumViewer.Core
             }
 
             return bitmap;
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to an image source.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
+        /// <param name="width">Width of the rendered image.</param>
+        /// <param name="height">Height of the rendered image.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="rotate">Rotation.</param>
+        /// <param name="flags">Flags used to influence the rendering.</param>
+        /// <param name="drawFormFields">Draw form fields.</param>
+        /// <returns>The rendered image.</returns>
+        public WriteableBitmap Render2(int page, int width, int height, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags, bool drawFormFields)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+
+            if ((flags & PdfRenderFlags.CorrectFromDpi) != 0)
+            {
+                width = width * (int)dpiX / 72;
+                height = height * (int)dpiY / 72;
+            }
+
+            var writeableBitmap = new WriteableBitmap(width, height, dpiX, dpiY, System.Windows.Media.PixelFormats.Bgra32, null);
+
+            try
+            {
+                // Reserve the back buffer for updates.
+                writeableBitmap.Lock();
+
+                IntPtr buffer = writeableBitmap.BackBuffer;
+
+                var handle = NativeMethods.FPDFBitmap_CreateEx(width, height, 4, buffer, width * 4);
+
+                try
+                {
+                    uint background = (flags & PdfRenderFlags.Transparent) == 0 ? 0xFFFFFFFF : 0x00FFFFFF;
+
+                    NativeMethods.FPDFBitmap_FillRect(handle, 0, 0, width, height, background);
+
+                    bool success = _file.RenderPDFPageToBitmap(
+                        page,
+                        handle,
+                        (int)dpiX, (int)dpiY,
+                        0, 0, width, height,
+                        (int)rotate,
+                        FlagsToFPDFFlags(flags),
+                        drawFormFields
+                    );
+
+                    if (!success)
+                        throw new Win32Exception();
+                }
+                finally
+                {
+                    NativeMethods.FPDFBitmap_Destroy(handle);
+                }
+
+                // Specify the area of the bitmap that changed.
+                writeableBitmap.AddDirtyRect(new System.Windows.Int32Rect(0, 0, width, height));
+            }
+            finally
+            {
+                // Release the back buffer and make it available for display.
+                writeableBitmap.Unlock();
+                writeableBitmap.Freeze();
+            }
+
+            return writeableBitmap;
         }
 
         private NativeMethods.FPDF FlagsToFPDFFlags(PdfRenderFlags flags)
