@@ -25,6 +25,10 @@ namespace PdfiumViewer.Drawing
                 image.Renderer.DrawMarkers(drawingContext, image.PageNo);
 
                 image.Renderer.DrawTextSelection(drawingContext, image.PageNo, image.Renderer.TextSelectionState);
+
+                // Draw simple border
+                var pen = new Pen(new SolidColorBrush(Colors.Black), 1);
+                drawingContext.DrawRectangle(null, pen, new Rect(0, 0, image.Width, image.Height));
             }
         }
     }

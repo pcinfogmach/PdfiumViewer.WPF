@@ -50,13 +50,6 @@ namespace PdfiumViewer
             {
                 HorizontalAlignment = HorizontalAlignment.Center
             };
-            Panel.Effect = new DropShadowEffect()
-            {
-                BlurRadius = 10,
-                Direction = 270,
-                RenderingBias = RenderingBias.Performance,
-                ShadowDepth = 0
-            };
             VirtualizingPanel.SetIsVirtualizing(Panel, true);
             VirtualizingPanel.SetVirtualizationMode(Panel, VirtualizationMode.Recycling);
             Content = Panel;
