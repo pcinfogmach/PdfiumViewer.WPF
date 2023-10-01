@@ -294,7 +294,7 @@ namespace PdfiumViewer
             var containerWidth = ActualWidth - Padding.Left - Padding.Right - FrameSpace.Left - FrameSpace.Right; // ViewportWidth
             var containerHeight = ActualHeight - Padding.Top - Padding.Bottom - FrameSpace.Top - FrameSpace.Bottom; // ViewportHeight
 
-            if (IsDocumentLoaded && containerWidth > 0 && containerHeight > 0)
+            if (IsDocumentLoaded && containerWidth > 0 && containerHeight > 0 && containerHeight < 10000)
             {
                 var currentPageSize = Document.GetPageSize(page.Value);
                 if (isReverse)
