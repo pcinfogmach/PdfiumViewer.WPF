@@ -205,14 +205,13 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding Title, Mode=OneWay}" />
-                                <TextBlock Grid.Column="1" Text="{Binding PageIndex, Mode=OneWay}" HorizontalAlignment="Right" Margin="10,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding PageIndex, Mode=OneWay, Converter={StaticResource MathConverter}, ConverterParameter=+1}" HorizontalAlignment="Right" Margin="10,0"/>
                             </Grid>
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
                 </TreeView>
             </TabItem>
-            <TabItem x:Name="ThumbnailsTab" Header="Thumbnails" 
-                     HorizontalAlignment="Stretch">
+            <TabItem x:Name="ThumbnailsTab" Header="Thumbnails" HorizontalAlignment="Stretch">
                 <pdfiumViewer:PdfRenderer Name="ThumbnailRenderer" Padding="0 10 0 10" 
                                           MouseClick="ThumbnailRenderer_MouseClick" 
                                           HorizontalAlignment="Stretch"
