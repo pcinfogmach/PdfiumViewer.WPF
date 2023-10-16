@@ -15,11 +15,12 @@ Additional features compared to the bezzad/PdfiumViewer:
 * Use pdfium binaris from [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries)
 * Lot of bug fixes
 
-![PdfiumViewer.WPF](https://raw.githubusercontent.com/bezzad/PdfiumViewer/master/screenshot.png)
 
-![PdfiumViewer.WPF](https://raw.githubusercontent.com/bezzad/PdfiumViewer/master/screenshot2.png)
+![PdfiumViewer.WPF](https://raw.githubusercontent.com/majkimester/PdfiumViewer.WPF/master/screenshot.png)
 
-![PdfiumViewer.WPF](https://raw.githubusercontent.com/bezzad/PdfiumViewer/master/screenshot3.png)
+![PdfiumViewer.WPF](https://raw.githubusercontent.com/majkimester/PdfiumViewer.WPF/master/screenshot2.png)
+
+![PdfiumViewer.WPF](https://raw.githubusercontent.com/majkimester/PdfiumViewer.WPF/master/screenshot3.png)
 
 ## Introduction
 
@@ -41,16 +42,6 @@ is fully compatible with both.
 ## Using the library
 
 The PdfiumViewer.WPF control requires native PDFium libraries. These are not included in this repository, but included as NuGet packages from bblanchon/pdfium-binaries. 
-
-## Note on the `PdfViewer` control
-
-The PdfiumViewer library primarily consists out of three components:
-
-* The `PdfRenderer` control. This control implements the raw PDF renderer.
-  This control displays a PDF document, provides zooming and scrolling
-  functionality and exposes methods to perform more advanced actions;
-* The `PdfDocument` class provides access to the PDF document and wraps
-  the Pdfium library.
 
 ## Bugs
 
