@@ -257,7 +257,7 @@ namespace PdfiumViewer
 
         protected BitmapSource RenderPage(PdfImage frame, int page, int width, int height)
         {
-            if (frame == null) return null;
+            if (frame == null || width == 0 || height == 0) return null;
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
