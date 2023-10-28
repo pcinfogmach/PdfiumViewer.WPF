@@ -7,26 +7,59 @@ namespace PdfiumViewer
     public partial class ScrollPanel
     {
         public const double DefaultZoomMin = 0.1;
-        public const double DefaultZoomMax = 5;
+        public const double DefaultZoomMax = 4;
         public const double DefaultZoomFactor = 1.2;
 
         /// <summary>
         /// Zoom allowed.
         /// </summary>
-        [DefaultValue(1.0)]
         public bool IsZoomAllowed { get; set; } = true;
 
         /// <summary>
         /// Zoom mode (FitHeight, FitWidth or None)
         /// </summary>
-        public PdfViewerZoomMode ZoomMode { get; protected set; } = PdfViewerZoomMode.FitHeight;
+        public PdfViewerZoomMode ZoomMode {
+            get => _zoomMode;
+            set
+            {
+                if (_zoomMode != value)
+                {
+                    _zoomMode = value;
+                    OnPagesDisplayModeChanged();
+                    OnPropertyChanged();
+                }
+            }
+        }
+        private PdfViewerZoomMode _zoomMode = PdfViewerZoomMode.FitHeight;
 
         /// <summary>
         /// Current zoom level.
         /// </summary>
         [Browsable(false)]
         [DefaultValue(1.0)]
-        public double Zoom { get; set; } = 1.0;
+        public double Zoom
+        {
+            get => _zoom;
+            set
+            {
+                if (IsZoomAllowed)
+                {
+                    var newZoom = Math.Min(Math.Max(value, ZoomMin), ZoomMax);
+                    if (newZoom != _zoom)
+                    {
+                        _zoom = newZoom;
+                        if (_zoomMode != PdfViewerZoomMode.None)
+                        {
+                            _zoomMode = PdfViewerZoomMode.None;
+                            OnPropertyChanged(nameof(ZoomMode));
+                        }
+                        OnPagesDisplayModeChanged();
+                        OnPropertyChanged();
+                    }
+                }
+            }
+        }
+        private double _zoom = 1.0;
 
         /// <summary>
         /// Maximum zoom level.
@@ -48,7 +81,7 @@ namespace PdfiumViewer
         /// </summary>
         public void ZoomIn()
         {
-            SetZoom(Zoom * ZoomFactor);
+            Zoom = Zoom * ZoomFactor;
         }
 
         /// <summary>
@@ -56,30 +89,7 @@ namespace PdfiumViewer
         /// </summary>
         public void ZoomOut()
         {
-            SetZoom(Zoom / ZoomFactor);
-        }
-
-        public void SetZoom(double zoom)
-        {
-            if (IsZoomAllowed)
-            {
-                var newZoom = Math.Min(Math.Max(zoom, ZoomMin), ZoomMax);
-                if (newZoom != Zoom)
-                {
-                    Zoom = newZoom;
-                    ZoomMode = PdfViewerZoomMode.None;
-                    OnPagesDisplayModeChanged();
-                }
-            }
-        }
-
-        public void SetZoomMode(PdfViewerZoomMode mode)
-        {
-            if (ZoomMode != mode)
-            {
-                ZoomMode = mode;
-                OnPagesDisplayModeChanged();
-            }
+            Zoom = Zoom / ZoomFactor;
         }
     }
 }

@@ -82,8 +82,8 @@ namespace PdfiumViewer.Demo
 
         public double ZoomPercent
         {
-            get => Renderer.Zoom * 100;
-            set => Renderer.SetZoom(value / 100);
+            get => Math.Round(Renderer.Zoom * 100);
+            set => Renderer.Zoom = value / 100;
         }
 
         public int Page
@@ -168,12 +168,12 @@ namespace PdfiumViewer.Demo
 
         private void OnFitWidth(object sender, RoutedEventArgs e)
         {
-            Renderer.SetZoomMode(PdfViewerZoomMode.FitWidth);
+            Renderer.ZoomMode = PdfViewerZoomMode.FitWidth;
         }
 
         private void OnFitHeight(object sender, RoutedEventArgs e)
         {
-            Renderer.SetZoomMode(PdfViewerZoomMode.FitHeight);
+            Renderer.ZoomMode = PdfViewerZoomMode.FitHeight;
         }
 
         private void OnZoomInClick(object sender, RoutedEventArgs e)
@@ -503,7 +503,7 @@ namespace PdfiumViewer.Demo
             {
                 ThumbnailRenderer.OpenPdf(new FileStream(_thumbnailFilename, FileMode.Open, FileAccess.Read, FileShare.Read));
                 ThumbnailRenderer.PagesDisplayMode = PdfViewerPagesDisplayMode.ContinuousMode;
-                ThumbnailRenderer.SetZoomMode(PdfViewerZoomMode.FitWidth);
+                ThumbnailRenderer.ZoomMode = PdfViewerZoomMode.FitWidth;
                 ThumbnailRenderer.IsZoomAllowed = false;
                 ThumbnailRenderer.CursorMode = PdfViewerCursorMode.Pan;
                 IsThumbnailLoaded = true;
