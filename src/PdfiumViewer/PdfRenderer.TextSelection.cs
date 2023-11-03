@@ -84,7 +84,7 @@ namespace PdfiumViewer
                     if (page != state.StartPage)
                         sb.AppendLine();
 
-                    sb.Append(Document.GetPdfText(new PdfTextSpan(page, start, end - start)));
+                    sb.Append(Document.GetPdfText(new PdfTextSpan(page, start, end - start + 1)));
                 }
 
                 return sb.ToString();
