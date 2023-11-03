@@ -212,16 +212,20 @@
                 </TreeView>
             </TabItem>
             <TabItem x:Name="ThumbnailsTab" Header="Thumbnails" HorizontalAlignment="Stretch">
-                <pdfiumViewer:PdfRenderer Name="ThumbnailRenderer" Padding="0 10 0 10" 
+                <AdornerDecorator>
+                    <pdfiumViewer:PdfRenderer Name="ThumbnailRenderer" Padding="0 10 0 10" 
                                           MouseClick="ThumbnailRenderer_MouseClick" 
                                           HorizontalAlignment="Stretch"
                                           HorizontalContentAlignment="Left"
                                           Width="200"
                                    />
+                </AdornerDecorator>
             </TabItem>
         </TabControl>
 
-        <pdfiumViewer:PdfRenderer Grid.Row="1" Grid.Column="1" Name="Renderer" Padding="10"/>
+        <AdornerDecorator Grid.Row="1" Grid.Column="1" >
+            <pdfiumViewer:PdfRenderer Name="Renderer" Padding="10"/>
+        </AdornerDecorator>
 
         <StatusBar Grid.Row="2" Grid.ColumnSpan="2">
             <StatusBarItem Content="Page:" />

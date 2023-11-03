@@ -327,7 +327,10 @@ namespace PdfiumViewer
             if (disposing)
             {
                 base.Dispose(true);
-                Dispatcher.Invoke(UnLoad);
+                if (!Dispatcher.HasShutdownStarted)
+                {
+                    Dispatcher.Invoke(UnLoad);
+                }
                 GC.SuppressFinalize(this);
                 GC.Collect();
             }
