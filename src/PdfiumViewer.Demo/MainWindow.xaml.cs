@@ -201,15 +201,23 @@ namespace PdfiumViewer.Demo
             var info = Renderer.GetInformation();
             if (info != null)
             {
+                double kB = info.FileSize / 1024d;
                 var sb = new StringBuilder();
-                sb.AppendLine($"Author: {info.Author}");
-                sb.AppendLine($"Creator: {info.Creator}");
-                sb.AppendLine($"Keywords: {info.Keywords}");
-                sb.AppendLine($"Producer: {info.Producer}");
-                sb.AppendLine($"Subject: {info.Subject}");
+                sb.AppendLine($"File Name: {info.FileName}");
+                sb.AppendLine($"File Size: {kB:0.0} kB ({info.FileSize} bytes)\n");
+
                 sb.AppendLine($"Title: {info.Title}");
+                sb.AppendLine($"Author: {info.Author}");
+                sb.AppendLine($"Subject: {info.Subject}");
+                sb.AppendLine($"Keywords: {info.Keywords}");
                 sb.AppendLine($"Create Date: {info.CreationDate}");
                 sb.AppendLine($"Modified Date: {info.ModificationDate}");
+                sb.AppendLine($"Creator: {info.Creator}\n");
+
+                sb.AppendLine($"Producer: {info.Producer}");
+                sb.AppendLine($"PDF Version: {info.Version}");
+                sb.AppendLine($"Page Count: {info.PageCount}");
+                sb.AppendLine($"Page Size: {info.PageWidth:0.0} x {info.PageHeight:0.0} mm");
 
                 MessageBox.Show(sb.ToString(), "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }

@@ -33,6 +33,26 @@ namespace PdfiumViewer.Core
 
             PdfLibrary.EnsureLoaded();
 
+            _pdfFileSize = stream.Length;
+            if (stream is FileStream fileStream)
+            {
+                _pdfFilePath = fileStream.Name;
+            }
+
+            if (stream.CanSeek)
+            {
+                const int bufferSize = 20;
+                byte[] buffer = new byte[bufferSize];
+                stream.Read(buffer, 0, bufferSize);
+                stream.Seek(-bufferSize, SeekOrigin.Current);
+                String line = Encoding.UTF8.GetString(buffer);
+                if (line?.StartsWith("%PDF") == true)
+                {
+                    int index = line.IndexOf('\r');
+                    _pdfVersion = line.Substring(5, index - 5);
+                }
+            }
+
             _stream = stream;
             _id = StreamManager.Register(stream);
 
@@ -45,6 +65,10 @@ namespace PdfiumViewer.Core
 
             LoadDocument(document);
         }
+
+        private long _pdfFileSize = 0;
+        private string _pdfFilePath = null;
+        private string _pdfVersion = null;
 
         public PdfBookmarkCollection Bookmarks { get; private set; }
 
@@ -598,7 +622,17 @@ namespace PdfiumViewer.Core
 
         public PdfInformation GetInformation()
         {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+
             var pdfInfo = new PdfInformation();
+
+            if (_pdfFilePath != null)
+            {
+                pdfInfo.FileName = Path.GetFileName(_pdfFilePath);
+                pdfInfo.FilePath = Path.GetFullPath(_pdfFilePath);
+            }
+            pdfInfo.FileSize = _pdfFileSize;
 
             pdfInfo.Creator = GetMetaText("Creator");
             pdfInfo.Title = GetMetaText("Title");
@@ -608,6 +642,13 @@ namespace PdfiumViewer.Core
             pdfInfo.Producer = GetMetaText("Producer");
             pdfInfo.CreationDate = GetMetaTextAsDate("CreationDate");
             pdfInfo.ModificationDate = GetMetaTextAsDate("ModDate");
+
+            pdfInfo.Version = _pdfVersion;
+            pdfInfo.PageCount = NativeMethods.FPDF_GetPageCount(_document);
+
+            SizeF size = GetPDFDocInfo(0);
+            pdfInfo.PageWidth = size.Width / 72f * 25.4f;
+            pdfInfo.PageHeight = size.Height / 72f * 25.4f;
 
             return pdfInfo;
         }
