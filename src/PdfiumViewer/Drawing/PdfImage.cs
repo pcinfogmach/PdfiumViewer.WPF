@@ -16,6 +16,8 @@ namespace PdfiumViewer.Drawing
 
         public PdfImage() : base()
         {
+            SnapsToDevicePixels = true;
+            UseLayoutRounding = true;
             ClipToBounds = true;
             Focusable = false;
             PreviewMouseLeftButtonDown += PdfImage_PreviewMouseLeftButtonDown;

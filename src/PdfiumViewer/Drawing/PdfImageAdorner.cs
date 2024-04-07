@@ -13,6 +13,8 @@ namespace PdfiumViewer.Drawing
         {
             IsClipEnabled = true;
             IsHitTestVisible = false;
+            SnapsToDevicePixels = true;
+            UseLayoutRounding = true;
         }
 
         protected override void OnRender(DrawingContext drawingContext)

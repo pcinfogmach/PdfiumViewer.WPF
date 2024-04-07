@@ -48,6 +48,8 @@ namespace PdfiumViewer
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
             Panel = new StackPanel()
             {
+                SnapsToDevicePixels = true,
+                UseLayoutRounding = true,
                 HorizontalAlignment = HorizontalAlignment.Center
             };
             VirtualizingPanel.SetIsVirtualizing(Panel, true);
