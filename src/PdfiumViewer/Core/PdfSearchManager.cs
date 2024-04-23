@@ -66,6 +66,8 @@ namespace PdfiumViewer.Core
 
         public int MatchesCount => _bounds?.Count ?? 0;
 
+        public int MatchesOffset => _offset;
+
         /// <summary>
         /// Gets or sets whether all matches should be highlighted.
         /// </summary>
@@ -103,20 +105,15 @@ namespace PdfiumViewer.Core
         public bool Search(string text)
         {
             Renderer.Markers.Clear();
+            _offset = -1;
+            _bounds = null;
 
-            if (string.IsNullOrEmpty(text) || Renderer.Document == null)
-            {
-                _bounds = null;
-                UpdateHighlights();
-            }
-            else
+            if (Renderer.Document != null && !string.IsNullOrEmpty(text))
             {
                 PdfMatches matches = Renderer.Document.Search(text, MatchCase, MatchWholeWord);
                 _bounds = GetAllBounds(matches);
                 _bounds = _bounds.OrderBy(b => b[0].Page).ThenByDescending(b => b[0].Bounds.Y).ThenBy(b => b[0].Bounds.Y).ToList();
             }
-
-            _offset = -1;
 
             UpdateHighlights();
 
