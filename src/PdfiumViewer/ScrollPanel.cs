@@ -304,6 +304,12 @@ namespace PdfiumViewer
                 if (ZoomMode == PdfViewerZoomMode.FitHeight)
                 {
                     _zoom = containerHeight / currentPageSize.Height;
+                    double width = _zoom * currentPageSize.Width;
+                    if (PagesDisplayMode == PdfViewerPagesDisplayMode.BookMode) width *= 2;
+                    if (width > containerWidth)
+                    {
+                        _zoom = (containerHeight - ScrollWidth) / currentPageSize.Height;
+                    }
                 }
                 else if (ZoomMode == PdfViewerZoomMode.FitWidth)
                 {
