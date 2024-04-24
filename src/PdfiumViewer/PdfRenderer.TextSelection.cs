@@ -23,6 +23,7 @@ namespace PdfiumViewer
 
         public PdfTextSelectionState TextSelectionState { get; set; } = null;
         protected bool MousePanningEnabled { get; set; } = true;
+        public bool FollowLinkEnabled { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the way the viewer should respond to cursor input
@@ -431,12 +432,15 @@ namespace PdfiumViewer
 
         internal void HandleMouseUpForLinks(PdfImage sender, int page, Size viewSize, Point mouseLocation)
         {
-            var mouseState = GetMouseState(page, viewSize, mouseLocation);
-            var link = sender.PageLinks.GetLinkOnLocation(mouseState.PdfLocation.Location);
-            if (link != null)
+            if (FollowLinkEnabled)
             {
-                var linkClickEventArgs = new LinkClickEventArgs(link);
-                HandleLinkClick(linkClickEventArgs);
+                var mouseState = GetMouseState(page, viewSize, mouseLocation);
+                var link = sender.PageLinks.GetLinkOnLocation(mouseState.PdfLocation.Location);
+                if (link != null)
+                {
+                    var linkClickEventArgs = new LinkClickEventArgs(link);
+                    HandleLinkClick(linkClickEventArgs);
+                }
             }
         }
 
