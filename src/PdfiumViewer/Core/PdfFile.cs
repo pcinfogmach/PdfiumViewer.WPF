@@ -49,7 +49,14 @@ namespace PdfiumViewer.Core
                 if (line?.StartsWith("%PDF") == true)
                 {
                     int index = line.IndexOf('\r');
-                    _pdfVersion = line.Substring(5, index - 5);
+                    if (index < 0)
+                    {
+                        index = line.IndexOf('\n');
+                    }
+                    if (index > 0)
+                    {
+                        _pdfVersion = line.Substring(5, index - 5);
+                    }
                 }
             }
 
