@@ -37,29 +37,8 @@ namespace PdfiumViewer
         /// <param name="dpiX">Horizontal DPI.</param>
         /// <param name="dpiY">Vertical DPI.</param>
         /// <param name="bounds">Bounds to render the page in.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, bool forPrinting);
-
-        /// <summary>
-        /// Renders a page of the PDF document to the provided graphics instance.
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>
-        /// <param name="graphics">Graphics instance to render the page on.</param>
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="bounds">Bounds to render the page in.</param>
         /// <param name="flags">Flags used to influence the rendering.</param>
         void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, PdfRenderFlags flags);
-
-        /// <summary>
-        /// Renders a page of the PDF document to an image.
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        /// <returns>The rendered image.</returns>
-        Image Render(int page, float dpiX, float dpiY, bool forPrinting);
 
         /// <summary>
         /// Renders a page of the PDF document to an image.
@@ -70,18 +49,6 @@ namespace PdfiumViewer
         /// <param name="flags">Flags used to influence the rendering.</param>
         /// <returns>The rendered image.</returns>
         Image Render(int page, float dpiX, float dpiY, PdfRenderFlags flags);
-
-        /// <summary>
-        /// Renders a page of the PDF document to an image.
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>
-        /// <param name="width">Width of the rendered image.</param>
-        /// <param name="height">Height of the rendered image.</param>
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        /// <returns>The rendered image.</returns>
-        Image Render(int page, int width, int height, float dpiX, float dpiY, bool forPrinting);
 
         /// <summary>
         /// Renders a page of the PDF document to an image.

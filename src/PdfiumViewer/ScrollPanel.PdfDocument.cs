@@ -13,29 +13,14 @@ namespace PdfiumViewer
     // ScrollPanel.PdfDocument
     public partial class ScrollPanel
     {
-        public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, bool forPrinting)
-        {
-            Document.Render(page, graphics, dpiX, dpiY, bounds, forPrinting);
-        }
-
         public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, PdfRenderFlags flags)
         {
             Document.Render(page, graphics, dpiX, dpiY, bounds, flags);
         }
 
-        public Image Render(int page, float dpiX, float dpiY, bool forPrinting)
-        {
-            return Document.Render(page, dpiX, dpiY, forPrinting);
-        }
-
         public Image Render(int page, float dpiX, float dpiY, PdfRenderFlags flags)
         {
             return Document.Render(page, dpiX, dpiY, flags);
-        }
-
-        public Image Render(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
-        {
-            return Document.Render(page, width, height, dpiX, dpiY, forPrinting);
         }
 
         public Image Render(int page, int width, int height, float dpiX, float dpiY, PdfRenderFlags flags)

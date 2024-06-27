@@ -1,10 +1,7 @@
-﻿using System;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using PdfiumViewer.Core;
 
 namespace PdfiumViewer.Helpers
 {
@@ -38,29 +35,33 @@ namespace PdfiumViewer.Helpers
             return bitmapImage;
         }
 
+        //[DllImport("gdi32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //public static extern bool DeleteObject([In] IntPtr hObject);
+
         /// <summary>
         /// Convert an IImage to a WPF BitmapSource. The result can be used in the Set Property of Image.Source
         /// Note: Performance is better than ToBitmapSource0
         /// </summary>
         /// <param name="bitmap">The Source Bitmap</param>
         /// <returns>The equivalent BitmapSource</returns>
-        public static BitmapSource ToBitmapSource1(this System.Drawing.Bitmap bitmap)
-        {
-            if (bitmap == null) return null;
+        //public static BitmapSource ToBitmapSource1(this System.Drawing.Bitmap bitmap)
+        //{
+        //    if (bitmap == null) return null;
 
-            using (var source = (System.Drawing.Bitmap)bitmap.Clone())
-            {
-                IntPtr hBitmap = source.GetHbitmap(); //obtain the Hbitmap
-                var bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                    hBitmap,
-                    IntPtr.Zero,
-                    System.Windows.Int32Rect.Empty,
-                    BitmapSizeOptions.FromEmptyOptions());
-                NativeMethods.DeleteObject(hBitmap); //release the HBitmap
-                bs.Freeze();
-                return bs;
-            }
-        }
+        //    using (var source = (System.Drawing.Bitmap)bitmap.Clone())
+        //    {
+        //        IntPtr hBitmap = source.GetHbitmap(); //obtain the Hbitmap
+        //        var bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+        //            hBitmap,
+        //            IntPtr.Zero,
+        //            System.Windows.Int32Rect.Empty,
+        //            BitmapSizeOptions.FromEmptyOptions());
+        //        NativeMethods.DeleteObject(hBitmap); //release the HBitmap
+        //        bs.Freeze();
+        //        return bs;
+        //    }
+        //}
 
         /// <summary>
         /// Convert an IImage to a WPF BitmapSource. The result can be used in the Set Property of Image.Source
@@ -85,8 +86,8 @@ namespace PdfiumViewer.Helpers
             return bitmapSource;
         }
 
-        [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
-        public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
+        //[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
+        //public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
 
         //// <summary>
         //// Convert an IImage to a WPF BitmapSource.The result can be used in the Set Property of Image.Source

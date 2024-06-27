@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
-using System.Windows.Interop;
 using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
 
@@ -43,52 +42,6 @@ namespace PdfiumViewer.Core
                 throw new ArgumentNullException(nameof(path));
 
             return Load(File.OpenRead(path), password);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the PdfDocument class with the provided path.
-        /// </summary>
-        /// <param name="owner">Window to show any UI for.</param>
-        /// <param name="path">Path to the PDF document.</param>
-        public static PdfDocument Load(IWin32Window owner, string path)
-        {
-            if (owner == null)
-                throw new ArgumentNullException(nameof(owner));
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-
-            return Load(owner, File.OpenRead(path), null);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the PdfDocument class with the provided path.
-        /// </summary>
-        /// <param name="owner">Window to show any UI for.</param>
-        /// <param name="stream">Stream for the PDF document.</param>
-        public static PdfDocument Load(IWin32Window owner, Stream stream)
-        {
-            if (owner == null)
-                throw new ArgumentNullException(nameof(owner));
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
-            return Load(owner, stream, null);
-        }
-
-        public static PdfDocument Load(IWin32Window owner, Stream stream, string password)
-        {
-            try
-            {
-                while (true)
-                {
-                    return new PdfDocument(stream, password);
-                }
-            }
-            catch
-            {
-                stream.Dispose();
-                throw;
-            }
         }
 
         /// <summary>
@@ -143,20 +96,6 @@ namespace PdfiumViewer.Core
                 throw new Win32Exception();
 
             PageSizes = new ReadOnlyCollection<SizeF>(_pageSizes);
-        }
-
-        /// <summary>
-        /// Renders a page of the PDF document to the provided graphics instance.
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>
-        /// <param name="graphics">Graphics instance to render the page on.</param>
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="bounds">Bounds to render the page in.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        public void Render(int page, Graphics graphics, float dpiX, float dpiY, Rectangle bounds, bool forPrinting)
-        {
-            Render(page, graphics, dpiX, dpiY, bounds, forPrinting ? PdfRenderFlags.ForPrinting : PdfRenderFlags.None);
         }
 
         /// <summary>
@@ -222,21 +161,6 @@ namespace PdfiumViewer.Core
         /// <param name="page">Number of the page to render.</param>
         /// <param name="dpiX">Horizontal DPI.</param>
         /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        /// <returns>The rendered image.</returns>
-        public Image Render(int page, float dpiX, float dpiY, bool forPrinting)
-        {
-            var size = PageSizes[page];
-
-            return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, forPrinting);
-        }
-
-        /// <summary>
-        /// Renders a page of the PDF document to an image.
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
         /// <param name="flags">Flags used to influence the rendering.</param>
         /// <returns>The rendered image.</returns>
         public Image Render(int page, float dpiX, float dpiY, PdfRenderFlags flags)
@@ -244,21 +168,6 @@ namespace PdfiumViewer.Core
             var size = PageSizes[page];
 
             return Render(page, (int)size.Width, (int)size.Height, dpiX, dpiY, flags);
-        }
-
-        /// <summary>
-        /// Renders a page of the PDF document to an image.
-        /// </summary>
-        /// <param name="page">Number of the page to render.</param>
-        /// <param name="width">Width of the rendered image.</param>
-        /// <param name="height">Height of the rendered image.</param>
-        /// <param name="dpiX">Horizontal DPI.</param>
-        /// <param name="dpiY">Vertical DPI.</param>
-        /// <param name="forPrinting">Render the page for printing.</param>
-        /// <returns>The rendered image.</returns>
-        public Image Render(int page, int width, int height, float dpiX, float dpiY, bool forPrinting)
-        {
-            return Render(page, width, height, dpiX, dpiY, forPrinting ? PdfRenderFlags.ForPrinting : PdfRenderFlags.None);
         }
 
         /// <summary>
