@@ -6,6 +6,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using PdfiumViewer.Drawing;
 using PdfiumViewer.Enums;
 
@@ -224,7 +227,7 @@ namespace PdfiumViewer.Core
                 height = height * (int)dpiY / 72;
             }
 
-            var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            var bitmap = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             bitmap.SetResolution(dpiX, dpiY);
 
             var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
@@ -334,6 +337,79 @@ namespace PdfiumViewer.Core
             }
 
             return writeableBitmap;
+        }
+
+        /// <summary>
+        /// Renders a page of the PDF document to an image.
+        /// </summary>
+        /// <param name="page">Number of the page to render.</param>
+        /// <param name="width">Width of the rendered image.</param>
+        /// <param name="height">Height of the rendered image.</param>
+        /// <param name="dpiX">Horizontal DPI.</param>
+        /// <param name="dpiY">Vertical DPI.</param>
+        /// <param name="rotate">Rotation.</param>
+        /// <param name="flags">Flags used to influence the rendering.</param>
+        /// <param name="drawFormFields">Draw form fields.</param>
+        /// <returns>The rendered image.</returns>
+        public BitmapSource Render3(int page, int width, int height, float dpiX, float dpiY, PdfRotation rotate, PdfRenderFlags flags, bool drawFormFields)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+
+            if ((flags & PdfRenderFlags.CorrectFromDpi) != 0)
+            {
+                width = width * (int)dpiX / 72;
+                height = height * (int)dpiY / 72;
+            }
+
+            // Create byte array to hold image data
+            byte[] imageData = new byte[width * height * 4]; // Assuming 32bpp ARGB format
+            GCHandle pinnedArray = GCHandle.Alloc(imageData, GCHandleType.Pinned);
+            IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+
+            try
+            {
+                var handle = NativeMethods.FPDFBitmap_CreateEx(width, height, 4, pointer, width * 4);
+                try
+                {
+                    uint background = (flags & PdfRenderFlags.Transparent) == 0 ? 0xFFFFFFFF : 0x00FFFFFF;
+
+                    NativeMethods.FPDFBitmap_FillRect(handle, 0, 0, width, height, background);
+
+                    bool success = _file.RenderPDFPageToBitmap(
+                        page,
+                        handle,
+                        (int)dpiX, (int)dpiY,
+                        0, 0, width, height,
+                        (int)rotate,
+                        FlagsToFPDFFlags(flags),
+                        drawFormFields
+                    );
+
+                    if (!success)
+                        throw new Win32Exception();
+                }
+                finally
+                {
+                    NativeMethods.FPDFBitmap_Destroy(handle);
+                }
+
+                var bitmapSource = BitmapSource.Create(
+                    width,
+                    height,
+                    dpiX,
+                    dpiY,
+                    PixelFormats.Bgra32,
+                    null,
+                    imageData,
+                    width * 4);
+                bitmapSource.Freeze();
+                return bitmapSource;
+            }
+            finally
+            {
+                pinnedArray.Free();
+            }
         }
 
         private NativeMethods.FPDF FlagsToFPDFFlags(PdfRenderFlags flags)

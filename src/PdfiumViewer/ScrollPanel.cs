@@ -240,7 +240,7 @@ namespace PdfiumViewer
                     Panel.Children.Add(Frames[i]);
                 }
 
-                GC.Collect();
+                //GC.Collect();
                 GotoPage(PageNo);
             }
         }
@@ -266,11 +266,14 @@ namespace PdfiumViewer
             // Note: direct convert the pdfium output to WriteableBitmap has a sighly worse performance than Render + ToBitmapSource2 method
             // var bitmapImage = Document.Render2(page, width, height, Dpi, Dpi, Rotate, Flags, false);
 
-            var image = Document.Render(page, width, height, Dpi, Dpi, Rotate, Flags);
+            // var image = Document.Render(page, width, height, Dpi, Dpi, Rotate, Flags);
+
+            // Note: direct convert the pdfium output to BitmapSource: No memory leak here: GC.Collect is not needed
+            var bitmapImage = Document.Render3(page, width, height, Dpi, Dpi, Rotate, Flags, false);
 
             var partTime = stopwatch.ElapsedMilliseconds;
 
-            BitmapSource bitmapImage = BitmapHelper.ToBitmapSource2(image as Bitmap);
+            //BitmapSource bitmapImage = BitmapHelper.ToBitmapSource2(image as Bitmap);
 
             stopwatch.Stop();
             Debug.WriteLine("RenderPage[" + page + "]: " + (stopwatch.ElapsedMilliseconds) + " mS, (" + (stopwatch.ElapsedMilliseconds - partTime) +" mS) size=" + width + " x " + height);
@@ -284,7 +287,7 @@ namespace PdfiumViewer
                 frame.PageNo = page;
                 frame.PageLinks = GetPageLinks(page, new Size(width, height));
             });
-            GC.Collect();
+            //GC.Collect();
             return bitmapImage;
         }
 
@@ -493,7 +496,7 @@ namespace PdfiumViewer
                     position += pageHeightWithFrame;
                     PageNoLast = pageNoLast;
                 }
-                GC.Collect();
+                //GC.Collect();
             }
         }
 
