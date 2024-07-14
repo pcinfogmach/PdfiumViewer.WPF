@@ -83,6 +83,7 @@ namespace PdfiumViewer.Helpers
 
             bitmap.UnlockBits(bitmapData);
 
+            bitmapSource.Freeze();
             return bitmapSource;
         }
 

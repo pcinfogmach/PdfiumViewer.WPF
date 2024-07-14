@@ -264,9 +264,9 @@ namespace PdfiumViewer
             stopwatch.Start();
 
             // Note: direct convert the pdfium output to WriteableBitmap has a sighly worse performance than Render + ToBitmapSource2 method
-            // var bitmapImage = Document.Render2(page, (int)(width * 1.2f), (int)(height * 1.2f), Dpi, Dpi, Rotate, Flags, false);
+            // var bitmapImage = Document.Render2(page, width, height, Dpi, Dpi, Rotate, Flags, false);
 
-            var image = Document.Render(page, (int)(width * 1.2f), (int)(height * 1.2f), Dpi, Dpi, Rotate, Flags);
+            var image = Document.Render(page, width, height, Dpi, Dpi, Rotate, Flags);
 
             var partTime = stopwatch.ElapsedMilliseconds;
 
