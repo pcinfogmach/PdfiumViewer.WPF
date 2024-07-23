@@ -179,6 +179,7 @@ namespace PdfiumViewer
 
         private Rect? BoundsFromPdf(PdfRectangle bounds, bool translateOffset)
         {
+            if (Frames == null) { return null; }
             PdfImage frame;
             if (PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode)
             {

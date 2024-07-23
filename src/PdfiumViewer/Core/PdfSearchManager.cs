@@ -91,10 +91,20 @@ namespace PdfiumViewer.Core
         public PdfSearchManager(PdfRenderer renderer)
         {
             Renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
+           
+            CurrentMatchColor = System.Windows.Media.Color.FromArgb(128,
+          SystemColors.HighlightColor.R,
+          SystemColors.HighlightColor.G,
+          SystemColors.HighlightColor.B);
+           
+            MatchColor = System.Windows.Media.Color.FromArgb(128,
+                Colors.Yellow.R,
+                Colors.Yellow.G,
+                Colors.Yellow.B);
 
             HighlightAllMatches = true;
-            MatchColor = Colors.Yellow;
-            CurrentMatchColor = SystemColors.HighlightColor;
+            //MatchColor = Colors.Yellow;
+            //CurrentMatchColor = SystemColors.HighlightColor;
         }
 
         /// <summary>
