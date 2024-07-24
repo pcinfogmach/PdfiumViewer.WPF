@@ -131,6 +131,14 @@ namespace PdfiumViewer
         /// <param name="bounds">The PDF bounds to scroll into view.</param>
         public void ScrollIntoView(PdfRectangle bounds)
         {
+            Loaded += (s, e) =>
+            {
+                Rect? bnd = BoundsFromPdf(bounds);
+                if (bnd != null)
+                {
+                    ScrollIntoView(bounds.Page, bnd.Value);
+                }
+            };
             Rect? bound = BoundsFromPdf(bounds);
             if (bound != null)
             {
