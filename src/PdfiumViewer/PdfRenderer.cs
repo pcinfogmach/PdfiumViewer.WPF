@@ -189,7 +189,8 @@ namespace PdfiumViewer
         {
             if (Frames == null) { return null; }
             PdfImage frame;
-            if (PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode)
+            if (PagesDisplayMode == PdfViewerPagesDisplayMode.ContinuousMode 
+                && bounds.Page >= 0 && bounds.Page < Frames.Length)
             {
                 frame = Frames[bounds.Page];
             }
